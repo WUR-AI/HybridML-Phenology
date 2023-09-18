@@ -12,8 +12,9 @@ import config
 from data import regions_japan
 
 from datasets.dataset import Dataset, split_location_token
+from evaluation.plots.coordinates import savefig_mae_over_coords
 from evaluation.plots.maps import savefig_location_r2s_on_map, savefig_location_rmse_on_map, savefig_location_mae_on_map
-from evaluation.plots.scatter import savefig_scatter_doys
+from evaluation.plots.scatter import savefig_scatter_doys, savefig_scatter_doys_global, savefig_scatter_doys_local
 from evaluation.util import group_items_per_location, group_items_per_country, group_items_per_region_japan
 from models.base import BaseModel
 
@@ -21,8 +22,12 @@ from models.base import BaseModel
 def evaluate(model: BaseModel,
              dataset: Dataset,
              model_name: str = None,
-             generate_plots_scatter: bool = True,  # TODO -- specify spatial scale
-             generate_plots_residual: bool = False,
+
+             generate_plots_scatter_global: bool = True,
+             generate_plots_scatter_local: bool = True,
+             generate_plots_mae_over_coords: bool = True,  # TODO
+
+             # generate_plots_residual: bool = False,  # TODO
              generate_plots_maps: bool = True,
              ):
     # If no model name is provided, use class name by default
@@ -138,7 +143,7 @@ def evaluate(model: BaseModel,
         'count': lambda _doy_true, _doy_pred: len(_doy_true),
     }
 
-    tables = []
+    tables = []  # TODO dont overwrite column names
 
     """
         Compute global & national metrics
@@ -275,6 +280,70 @@ def evaluate(model: BaseModel,
                  path_eval,
                  f'local_{country.lower()}_test',
                  )
+
+    # TODO -- save tables -- fix
+
+    # _save_tables(
+    #     tables,
+    #     column_names,
+    #     path_eval,
+    #     'table_metrics'
+    # )
+
+    """
+        #########################################################################
+        #  Optionally generate plots                                            #
+        #########################################################################
+    """
+
+    """
+        Scatter DOYs globally
+    """
+    if generate_plots_scatter_global:
+
+        savefig_scatter_doys_global(
+            doys_true_train,
+            doys_pred_train,
+            locations_train,
+            path=os.path.join(path_figures, 'plots_scatter_global_train')
+        )
+
+        savefig_scatter_doys_global(
+            doys_true_test,
+            doys_pred_test,
+            locations_test,
+            path=os.path.join(path_figures, 'plots_scatter_global_test')
+        )
+
+    """
+        Scatter DOYs locally
+    """
+    if generate_plots_scatter_local:
+
+        savefig_scatter_doys_local(
+            doys_true_train,
+            doys_pred_train,
+            locations_train,
+            path=os.path.join(path_figures, 'plots_scatter_local_train')
+        )
+
+        savefig_scatter_doys_local(
+            doys_true_test,
+            doys_pred_test,
+            locations_test,
+            path=os.path.join(path_figures, 'plots_scatter_local_test')
+        )
+
+    """
+        Plot model performance over coordinates
+    """
+    if generate_plots_mae_over_coords:
+        savefig_mae_over_coords(
+            doys_true_test,
+            doys_pred_test,
+            locations_test,
+            path=os.path.join(path_figures, 'plots_mae_over_coords')
+        )
 
 
 def _save_tables(tables: list,
