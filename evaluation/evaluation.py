@@ -345,6 +345,29 @@ def evaluate(model: BaseModel,
             path=os.path.join(path_figures, 'plots_mae_over_coords')
         )
 
+    """
+        Plot maps
+    """
+    if generate_plots_maps:
+
+        path_maps = os.path.join(path_figures, 'maps')
+
+        savefig_location_r2s_on_map(
+            [r2_score(doys_true_per_location_train[loc], doys_pred_per_location_train[loc])
+             for loc in doys_true_per_location_train.keys()],
+            list(doys_true_per_location_train.keys()),
+            path_maps,
+            'map_r2_train.png',
+        )
+
+        savefig_location_r2s_on_map(
+            [r2_score(doys_true_per_location_test[loc], doys_pred_per_location_test[loc])
+             for loc in doys_true_per_location_test.keys()],
+            list(doys_true_per_location_test.keys()),
+            path_maps,
+            'map_r2_test.png',
+        )
+
 
 def _save_tables(tables: list,
                  column_names: list,  # Assumed to be equal for all tables

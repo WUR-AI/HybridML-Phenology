@@ -5,6 +5,7 @@ import matplotlib.colors
 from mpl_toolkits.basemap import Basemap
 
 import config
+from data.bloom_doy import get_locations_coordinates
 from datasets.dataset import split_location_token
 
 
@@ -202,9 +203,9 @@ def savefig_locations_on_map(locations: list,
     """
 
     # Get all location coordinates
-    location_data = get_location_data(set_index=True)
+    location_data = get_locations_coordinates()
     lats = location_data.loc[locations]['lat'].values
-    lons = location_data.loc[locations]['lon'].values
+    lons = location_data.loc[locations]['long'].values
 
     # Get all countries that are included in the location tokens
     # These are needed to know for which country we should make maps
@@ -263,9 +264,9 @@ def savefig_location_r2s_on_map(r2s: list,
     assert len(r2s) == len(locations)
 
     # Get all location coordinates
-    location_data = get_location_data(set_index=True)
+    location_data = get_locations_coordinates()
     lats = location_data.loc[locations]['lat'].values
-    lons = location_data.loc[locations]['lon'].values
+    lons = location_data.loc[locations]['long'].values
 
     # Get all countries that are included in the location tokens
     # These are needed to know for which country we should make maps
@@ -330,9 +331,9 @@ def savefig_location_rmse_on_map(rmses: list,
     assert len(rmses) == len(locations)
 
     # Get all location coordinates
-    location_data = get_location_data(set_index=True)
+    location_data = get_locations_coordinates()
     lats = location_data.loc[locations]['lat'].values
-    lons = location_data.loc[locations]['lon'].values
+    lons = location_data.loc[locations]['long'].values
 
     # Get all countries that are included in the location tokens
     # These are needed to know for which country we should make maps
@@ -397,9 +398,9 @@ def savefig_location_mae_on_map(maes: list,
     assert len(maes) == len(locations)
 
     # Get all location coordinates
-    location_data = get_location_data(set_index=True)
+    location_data = get_locations_coordinates()
     lats = location_data.loc[locations]['lat'].values
-    lons = location_data.loc[locations]['lon'].values
+    lons = location_data.loc[locations]['long'].values
 
     # Get all countries that are included in the location tokens
     # These are needed to know for which country we should make maps
@@ -485,9 +486,9 @@ def savefig_location_annotations_on_map(annotations: list,
     colors = colors or 'red'
 
     # Get all location coordinates
-    location_data = get_location_data(set_index=True)
+    location_data = get_locations_coordinates()
     lats = location_data.loc[locations]['lat'].values
-    lons = location_data.loc[locations]['lon'].values
+    lons = location_data.loc[locations]['long'].values
 
     # Get all countries that are included in the location tokens
     # These are needed to know for which country we should make maps
@@ -532,44 +533,44 @@ def savefig_location_annotations_on_map(annotations: list,
 # TODO -- regional plots
 
 
-if __name__ == '__main__':
-    import sklearn.model_selection
-
-    from data.locations import get_data as get_location_data
-    _locs = get_location_data(set_index=True).index.values
-
-    from data.regions_japan import LOCATIONS_WO_OKINAWA
-
-    seed_location_split = config.SEED
-    _locs = list(LOCATIONS_WO_OKINAWA.keys())
-    train_locations, test_locations = sklearn.model_selection.train_test_split(_locs,
-                                                                               random_state=seed_location_split,
-                                                                               shuffle=True,
-                                                                               train_size=0.9,
-                                                                               )
-
-    savefig_location_annotations_on_map(
-        [''] * len(_locs),
-        train_locations + test_locations,
-        path='temp',
-        colors=['black'] * len(train_locations) + ['red'] * len(test_locations),
-    )
-
-
-    # # savefig_location_annotations_on_map(locations=_locs,
-    # savefig_location_annotations_on_map(locations=_locs,
-    #                                     path='temp',
-    #                                     annotations=[''] * len(_locs))
-    #
-    # fig, ax = plt.subplots()
-    #
-    # m = _get_basemap_japan()
-    #
-    # ax.spines['top'].set_visible(False)
-    # ax.spines['right'].set_visible(False)
-    # ax.spines['left'].set_visible(False)
-    # ax.spines['bottom'].set_visible(False)
-    #
-    # plt.savefig('temp2.png',
-    #             dpi=1000,
+# if __name__ == '__main__':
+#     import sklearn.model_selection
+#
+#     from data.locations import get_data as get_location_data
+#     _locs = get_location_data(set_index=True).index.values
+#
+#     from data.regions_japan import LOCATIONS_WO_OKINAWA
+#
+#     seed_location_split = config.SEED
+#     _locs = list(LOCATIONS_WO_OKINAWA.keys())
+#     train_locations, test_locations = sklearn.model_selection.train_test_split(_locs,
+#                                                                                random_state=seed_location_split,
+#                                                                                shuffle=True,
+#                                                                                train_size=0.9,
+#                                                                                )
+#
+#     savefig_location_annotations_on_map(
+#         [''] * len(_locs),
+#         train_locations + test_locations,
+#         path='temp',
+#         colors=['black'] * len(train_locations) + ['red'] * len(test_locations),
+#     )
+#
+#
+#     # # savefig_location_annotations_on_map(locations=_locs,
+#     # savefig_location_annotations_on_map(locations=_locs,
+#     #                                     path='temp',
+#     #                                     annotations=[''] * len(_locs))
+#     #
+#     # fig, ax = plt.subplots()
+#     #
+#     # m = _get_basemap_japan()
+#     #
+#     # ax.spines['top'].set_visible(False)
+#     # ax.spines['right'].set_visible(False)
+#     # ax.spines['left'].set_visible(False)
+#     # ax.spines['bottom'].set_visible(False)
+#     #
+#     # plt.savefig('temp2.png',
+#     #             dpi=1000,
     #             )

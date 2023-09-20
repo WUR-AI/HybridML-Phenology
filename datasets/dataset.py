@@ -215,11 +215,11 @@ class Dataset:
             data_opt['temperature'] = temperature_data
 
         if self._includes_photoperiod:
-            data_opt['photoperiod'] = photoperiod(
+            data_opt['photoperiod'] = [photoperiod(
                 phi=sample_doy.lat,
-                doy=sample_doy.bloom_doy,
+                doy=doy,
                 verbose=False,
-            )
+            ) for doy in Dataset.DOYS]
 
         # TODO -- soil moisture
 

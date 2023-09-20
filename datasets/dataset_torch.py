@@ -68,6 +68,8 @@ class TorchDatasetWrapper:
 
         if 'temperature' in sample.keys():
             new_sample['temperature'] = torch.tensor(sample['temperature'], dtype=dtype).to(device)
+        if 'photoperiod' in sample.keys():
+            new_sample['photoperiod'] = torch.tensor(sample['photoperiod'], dtype=dtype).to(device)
 
         return new_sample
 
@@ -93,6 +95,8 @@ class TorchDatasetWrapper:
 
         if 'temperature' in samples[0].keys():
             batched_sample['temperature'] = batch_tensors(*[sample['temperature'] for sample in samples])
+        if 'photoperiod' in samples[0].keys():
+            batched_sample['photoperiod'] = batch_tensors(*[sample['photoperiod'] for sample in samples])
 
         return batched_sample
 
@@ -112,8 +116,10 @@ class TorchDatasetWrapper:
         # sample['temperature_raw'] = sample['temperature']
         # sample['temperature'] = min_max_normalize(sample['temperature'], t_min, t_max)
 
-        if 'temperature' in sample.keys():  # TODO -- photoperiod and others
+        if 'temperature' in sample.keys():  # TODO -- more features
             sample['temperature'] = TorchDatasetWrapper.normalize_temperature(sample['temperature'], revert=revert)
+        if 'photoperiod' in sample.keys():
+            sample['photoperiod'] = TorchDatasetWrapper.normalize_photoperiod(sample['photoperiod'], revert=revert)
 
         sample['lat'] = normalize_latitude(sample['lat'], revert=revert)
         sample['lon'] = normalize_longitude(sample['lon'], revert=revert)
@@ -124,11 +130,38 @@ class TorchDatasetWrapper:
     def normalize_temperature(ts: torch.Tensor, revert: bool = False):
         return mean_std_normalize(ts, mean=6.65, std=9.09, revert=revert)
 
+    @staticmethod
+    def normalize_photoperiod(ps: torch.Tensor, revert: bool = False):
+        return mean_std_normalize(ps, mean=11.8, std=2.2, revert=revert)
+
+
 def get_normalization_parameters_temperature(dataset: Dataset) -> dict:
     if dataset.includes_temperature:
         data_train = dataset.get_train_data()
 
         ts = np.concatenate([d['temperature'] for d in data_train])
+
+        tmin = np.min(ts)
+        tmax = np.max(ts)
+
+        tavg = np.mean(ts)
+        tstd = np.std(ts)
+
+        return {
+            'min': tmin,
+            'max': tmax,
+            'avg': tavg,
+            'std': tstd,
+        }
+    else:
+        return {}
+
+
+def get_normalization_parameters_photoperiod(dataset: Dataset) -> dict:
+    if dataset.includes_photoperiod:
+        data_train = dataset.get_train_data()
+
+        ts = np.concatenate([d['photoperiod'] for d in data_train])
 
         tmin = np.min(ts)
         tmax = np.max(ts)
@@ -153,9 +186,11 @@ if __name__ == '__main__':
     _dataset = Dataset(
         year_split=train_test_split(Dataset.YEAR_RANGE, random_state=config.SEED, shuffle=True),
         include_temperature=True,
+        include_photoperiod=True,
     )
 
     _dataset_wrapped = TorchDatasetWrapper(_dataset)
 
-    print(get_normalization_parameters_temperature(_dataset))
+    # print(get_normalization_parameters_temperature(_dataset))
+    print(get_normalization_parameters_photoperiod(_dataset))
 

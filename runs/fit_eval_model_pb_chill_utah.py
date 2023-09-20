@@ -26,7 +26,7 @@ if __name__ == '__main__':
         model = LocalUtahChillModel.load(model_name)
     else:
         model, _ = LocalUtahChillModel.fit(dataset)
-        model.save(model_name)
+        # model.save(model_name)
 
     if not args.skip_eval:
         evaluate(model,

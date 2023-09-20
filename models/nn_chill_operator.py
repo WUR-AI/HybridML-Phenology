@@ -2,7 +2,7 @@ import torch
 
 import config
 from models.base_torch_accumulation import BaseTorchAccumulationModel
-from models.components.torch_phenology import DegreeDaysCNN
+from models.components.torch_phenology import DegreeDaysCNN, TestDegreeDaysDNN, DegreeDaysDNN
 from models.components.torch_phenology_pb import TorchGDD, LogisticUtahChillModule
 from models.components.param import ParameterModel
 
@@ -13,7 +13,9 @@ class NNChillModel(BaseTorchAccumulationModel):
                  param_model: ParameterModel,
                  ):
         super().__init__(param_model)
-        self._chill_model = DegreeDaysCNN()
+        # self._chill_model = DegreeDaysCNN()
+        self._chill_model = DegreeDaysDNN()
+        # self._chill_model = TestDegreeDaysDNN()
 
     def f_units_chill_growth(self, xs: dict, tb: torch.Tensor):
         cus = self._chill_model(xs)
