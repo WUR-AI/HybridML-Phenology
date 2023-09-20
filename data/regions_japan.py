@@ -141,4 +141,153 @@ LOCATIONS = {
     'Japan/Kutchan': 0,
 }
 
+
+VARIETIES = {
+    0: 'someiyoshino',  # Prunus Yedoenis
+    1: 'ezoyamazakura',
+    2: 'hikanzakura',  # Prunus campanulata Maxim
+    3: 'chishimazakura', # Prunus nipponica Matsum
+}
+
+# Source: https://www.data.jma.go.jp/sakura/data/sakura004_07.html
+LOCATION_VARIETY = {
+    'Japan/Kushiro-1': 1,
+    'Japan/Naze': 2,
+    'Japan/Miyakejima': 0,
+    'Japan/Fukushima': 0,
+    'Japan/Kagoshima': 0,
+    'Japan/Saga': 0,
+    'Japan/Nagasaki': 0,
+    'Japan/Muroran-2': 0,
+    'Japan/Tottori-2': 0,
+    'Japan/Niigata': 0,
+    'Japan/Toyooka': 0,
+    'Japan/Nagoya-1': 0,
+    'Japan/Tateyama': 0,
+    'Japan/Tottori-1': 0,
+    'Japan/Nago': 2,
+    'Japan/Kobe': 0,
+    'Japan/Tsuruga': 0,
+    'Japan/Shimonoseki': 0,
+    'Japan/Miyako': 2,
+    'Japan/Izuhara-2': 0,
+    # 'Japan/Shionomisaki': ,
+    'Japan/Asahikawa': 1,
+    'Japan/Wakkanai': 1,
+    'Japan/Fukue': 0,
+    'Japan/Sendai-2': 0,
+    'Japan/Mito': 0,
+    'Japan/Nemuro': 3,
+    'Japan/Wajima': 0,
+    'Japan/Rumoi': 1,
+    'Japan/Gifu': 0,
+    'Japan/Hachinohe': 0,
+    'Japan/Yamagata': 0,
+    'Japan/Abashiri': 1,
+    'Japan/Kyoto-2': 0,
+    'Japan/Onahama': 0,
+    'Japan/Matsuyama': 0,
+    'Japan/Muroran-1': 0,
+    'Japan/Oita': 0,
+    # 'Japan/Ishigakijima': ,
+    'Japan/Esashi': 0,
+    'Japan/Kushiro-2': 1,
+    'Japan/Kochi-1': 0,
+    'Japan/Okayama': 0,
+    'Japan/Sakata': 0,
+    'Japan/Fukui': 0,
+    'Japan/Toyama': 0,
+    'Japan/Osaka': 0,
+    'Japan/Obihiro': 1,
+    'Japan/Kumamoto': 0,
+    'Japan/Urakawa': 1,
+    'Japan/Sendai-1': 0,
+    'Japan/Shizuoka': 0,
+    # 'Japan/Minamidaitojima': ,
+    'Japan/Yakushima-2': 0,
+    'Japan/Takamatsu': 0,
+    # 'Japan/Iriomotejima': ,
+    'Japan/Kyoto-1': 0,
+    'Japan/Iida': 0,
+    'Japan/Nara': 0,
+    'Japan/Utsunomiya': 0,
+    'Japan/Hamada': 0,
+    'Japan/Yokohama': 0,
+    'Japan/Shinjo': 0,
+    'Japan/Iwamizawa': 1,
+    'Japan/Sumoto': 0,
+    'Japan/Hachijojima': 0,
+    'Japan/Miyakojima': 2,
+    'Japan/Nagoya-2': 0,
+    'Japan/Matsumoto': 0,
+    'Japan/Saigo': 0,
+    'Japan/Tokyo': 0,
+    'Japan/Aomori': 0,
+    'Japan/Hamamatsu': 0,
+    'Japan/Kofu': 0,
+    'Japan/Tanegashima': 0,
+    'Japan/Kochi-2': 0,
+    'Japan/Sapporo': 0,
+    'Japan/Yakushima-1': 0,
+    'Japan/Tsu': 0,
+    'Japan/Kumagaya': 0,
+    'Japan/Hikone': 0,
+    'Japan/Fukuoka': 0,
+    # 'Japan/Mombetsu': ,
+    'Japan/Wakayama': 0,
+    'Japan/Oshima': 0,
+    'Japan/Owase': 0,
+    'Japan/Kanazawa': 0,
+    'Japan/Maebashi': 0,
+    'Japan/Nobeoka': 0,
+    'Japan/Morioka': 0,
+    'Japan/Shirakawa': 0,
+    'Japan/Akita': 0,
+    'Japan/Izuhara-1': 0,
+    'Japan/Uwajima': 0,
+    'Japan/Naze,Funchatoge': 2,
+    'Japan/Choshi': 0,
+    'Japan/Naha': 2,
+    'Japan/Matsue': 0,
+    'Japan/Takada': 0,
+    'Japan/Yonago': 0,
+    'Japan/Takayama': 0,
+    'Japan/Hiroo': 1,
+    'Japan/Aikawa': 0,
+    'Japan/Hakodate': 0,
+    'Japan/Tokushima': 0,
+    'Japan/Hiroshima': 0,
+    'Japan/Kumejima': 2,
+    # 'Japan/Yonagunijima': ,
+    'Japan/Nagano': 0,
+    'Japan/Miyazaki': 0,
+    'Japan/Maizuru': 0,
+    # 'Japan/Kutchan': ,  # Kutchan observed Ezoyamazakura until 1994 and Someiyoshino from 1995 to 2006 .
+}
+
 LOCATIONS_WO_OKINAWA = {k: v for k, v in LOCATIONS.items() if v != 10}
+
+LOCATIONS_JAPAN_YEDOENIS = {k: v for k, v in LOCATION_VARIETY.items() if v == 0}
+
+
+if __name__ == '__main__':
+    from evaluation.plots.maps import savefig_location_annotations_on_map
+
+    _locations = list(LOCATION_VARIETY.keys())
+    _cmap = {
+        0: 'red',
+        1: 'blue',
+        2: 'green',
+        3: 'purple',
+    }
+    _colors = [_cmap[LOCATION_VARIETY[_loc]] for _loc in _locations]
+
+    savefig_location_annotations_on_map(
+        # annotations=[''] * len(_locations),
+        [_loc.split('/')[1] for _loc in _locations],
+        locations=_locations,
+        path='temp',
+        colors=_colors,
+    )
+
+

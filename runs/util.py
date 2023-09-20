@@ -18,6 +18,7 @@ _LOCATION_GROUPS = {
     'south_korea': data.bloom_doy.get_locations_south_korea(),
     'usa': data.bloom_doy.get_locations_usa(),
     'japan_wo_okinawa': list(data.regions_japan.LOCATIONS_WO_OKINAWA.keys()),
+    'japan_yedoenis': list(data.regions_japan.LOCATIONS_JAPAN_YEDOENIS.keys()),
 }
 
 
@@ -26,7 +27,7 @@ def configure_argparser_main(parser: argparse.ArgumentParser) -> argparse.Argume
                         type=str,
                         )
 
-    parser.add_argument('--seed',
+    parser.add_argument('--seed',  # TODO -- option to generate randomly
                         type=int,
                         )
 
