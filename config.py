@@ -1,6 +1,7 @@
 
 import os
 
+import numpy as np
 import torch
 
 """
@@ -36,8 +37,10 @@ os.makedirs(PATH_DATASET_DIR, exist_ok=True)
     Other
 """
 
-# One seed to rule them all
-SEED = 758  # Chosen by a generating a random number between 1-1000
+# SEED = 758  # Chosen by a generating a random number between 1-1000
+
+# Random seed that is used if none is provided explicitly
+SEED = np.random.randint(2147483647 + 1)  # Max allowed nr for int32
 
 """
     PyTorch
@@ -46,5 +49,5 @@ SEED = 758  # Chosen by a generating a random number between 1-1000
 # TORCH_DTYPE = torch.double
 TORCH_DTYPE = torch.float32
 
-TORCH_SEED = SEED
-torch.manual_seed(TORCH_SEED)
+# TORCH_SEED = SEED
+# torch.manual_seed(TORCH_SEED)

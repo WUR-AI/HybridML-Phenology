@@ -223,6 +223,61 @@ class BaseAccumulationModel(BaseModel):
             enumerate(cls._grid_grs()),
         )
 
+    @classmethod
+    def fit(cls,
+            dataset: Dataset,
+            method: str = 'grid',
+            name: str = None,
+            ) -> tuple:
+        name = name or cls.__name__  # TODO -- save results
+
+        if method == 'grid':
+
+            df = cls._fit_grid(dataset.get_train_data())
+
+            df.sort_index(level=[1, 2], inplace=True)
+
+            best_fit = df.loc[df['mse'].idxmin()]
+
+            tb = best_fit['t_base']
+            cr = best_fit['chill_req']
+            gr = best_fit['growth_req']
+
+            # Initialize a model using parameters
+            model = cls(
+                threshold_chill=cr,
+                threshold_growth=gr,
+                t_base=tb,
+            )
+            return model, {}
+
+        raise NotImplementedError
+
+    @classmethod
+    def _fit_grid(cls,  # TODO -- this is a duplicate -- change the other function
+                  xs: list,
+                  ) -> pd.DataFrame:
+
+        pool = mp.Pool(processes=mp.cpu_count() - 1)
+
+        # TODO -- tqdm over t_base?
+
+        def _param_iter() -> iter:
+            for params in cls._parameter_grid():
+                yield xs, params
+
+        grid = pool.starmap(cls._eval_samples, _param_iter())
+
+        # Store all entries in a DataFrame
+        df = pd.DataFrame(grid)
+        # Set the index
+        df.set_index(['i_t_base', 'i_chill_req', 'i_growth_req'], inplace=True)
+
+        return df
+
+    def save(self, model_name: str):  # TODO
+        pass  # Model is saved when fitting the model
+
 
 class BaseLocalAccumulationModel(BaseModel):
 
@@ -304,6 +359,9 @@ class BaseLocalAccumulationModel(BaseModel):
         # Initialize a model from the saved parameters and return it
         model = cls.load(name)
         return model, {}
+
+    def save(self, model_name: str):  # TODO
+        pass  # Model is saved when fitting the model
 
     @classmethod
     def load(cls, name: str):

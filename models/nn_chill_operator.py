@@ -14,7 +14,7 @@ class NNChillModel(BaseTorchAccumulationModel):
                  ):
         super().__init__(param_model)
         # self._chill_model = DegreeDaysCNN()
-        self._chill_model = DegreeDaysDNN()
+        self._chill_model = DegreeDaysDNN(hidden_size=64)
         # self._chill_model = DegreeDaysDNN_PP()
         # self._chill_model = DegreeDaysDNN_Coord()
 

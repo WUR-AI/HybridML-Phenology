@@ -19,6 +19,9 @@ from evaluation.util import group_items_per_location, group_items_per_country, g
 from models.base import BaseModel
 
 
+# TODO -- model specific evaluation
+
+
 def evaluate(model: BaseModel,
              dataset: Dataset,
              model_name: str = None,

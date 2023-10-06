@@ -233,6 +233,58 @@ class LocalParams(ParameterModel, nn.Module):
         return df
 
 
+class GlobalParams(ParameterModel, nn.Module):
+
+    def __init__(self,
+                 init_th_c: float = 0.0,
+                 init_th_g: float = 0.0,
+                 init_tb_g: float = 0.0,
+                 ):
+        super().__init__()
+
+        self._th_c = torch.nn.Parameter(torch.tensor(float(init_th_c), requires_grad=True))
+        self._th_g = torch.nn.Parameter(torch.tensor(float(init_th_g), requires_grad=True))
+        self._tb_g = torch.nn.Parameter(torch.tensor(float(init_tb_g), requires_grad=True))
+
+    def get_parameters(self, xs: dict):
+        return self(xs)
+
+    def forward(self, xs: dict):
+
+        bs = len(xs['location'])
+
+        th_c = self._th_c.unsqueeze(-1).expand(bs, 1)
+        th_g = self._th_g.unsqueeze(-1).expand(bs, 1)
+        tb_g = self._tb_g.unsqueeze(-1).expand(bs, 1)
+
+        th_c = self._scale_thc(th_c)
+        th_g = self._scale_thg(th_g)
+        tb_g = self._scale_tbg(tb_g)
+
+        return th_c, th_g, tb_g
+
+    @staticmethod
+    def _scale_thc(thc: torch.Tensor):
+        w_thc = 1
+        thc = _modified_relu(thc)
+        thc = thc * w_thc
+        return thc
+
+    @staticmethod
+    def _scale_thg(thg: torch.Tensor):
+        w_thg = 1
+        thg = _modified_relu(thg)
+        thg = thg * w_thg
+        return thg
+
+    @staticmethod
+    def _scale_tbg(tbg: torch.Tensor):
+        w_tbg = 20
+        tbg = _modified_relu(tbg)
+        tbg = tbg * w_tbg
+        return tbg
+
+
 def _modified_relu(x: torch.Tensor):
     w = 1
     return F.relu(x) + w * (x - x.detach().clone())

@@ -9,6 +9,10 @@ from data.bloom_doy import get_locations_coordinates
 from datasets.dataset import split_location_token
 
 
+_MAP_DPI = 500
+_ANN_FONT_SIZE = 3
+
+
 def _get_basemap(min_lat: float,
                  max_lat: float,
                  min_lon: float,
@@ -158,11 +162,11 @@ def savefig_location_on_map(location: str,
 
     ax.annotate(site,
                 m(lon, lat),
-                fontsize=2,
+                fontsize=_ANN_FONT_SIZE,
                 )
 
     plt.savefig(path,
-                dpi=500,
+                dpi=_MAP_DPI,
                 )
 
     plt.cla()
@@ -238,11 +242,11 @@ def savefig_locations_on_map(locations: list,
             _, site = split_location_token(location)
             ax.annotate(site,
                         m(lon, lat),
-                        fontsize=2,
+                        fontsize=_ANN_FONT_SIZE,
                         )
         # Save the figure
         plt.savefig(path,
-                    dpi=500,
+                    dpi=_MAP_DPI,
                     )
         # Clear results for constructing the next figure
         plt.cla()
@@ -305,11 +309,11 @@ def savefig_location_r2s_on_map(r2s: list,
             ann = f'{r2:.2f}'
             ax.annotate(ann,
                         m(lon, lat),
-                        fontsize=2,
+                        fontsize=_ANN_FONT_SIZE,
                         )
         # Save the figure
         plt.savefig(os.path.join(c_path, filename),
-                    dpi=1000,
+                    dpi=_MAP_DPI,
                     )
         # Clear results for constructing the next figure
         plt.cla()
@@ -372,11 +376,11 @@ def savefig_location_rmse_on_map(rmses: list,
             ann = f'{r2:.1f}'
             ax.annotate(ann,
                         m(lon, lat),
-                        fontsize=2,
+                        fontsize=_ANN_FONT_SIZE,
                         )
         # Save the figure
         plt.savefig(os.path.join(c_path, filename),
-                    dpi=1000,
+                    dpi=_MAP_DPI,
                     )
         # Clear results for constructing the next figure
         plt.cla()
@@ -456,11 +460,11 @@ def savefig_location_mae_on_map(maes: list,
         #     ann = f'{mae:.1f}'
         #     ax.annotate(ann,
         #                 m(lon, lat),
-        #                 fontsize=2,
+        #                 fontsize=_ANN_FONT_SIZE,
         #                 )
         # Save the figure
         plt.savefig(os.path.join(c_path, filename),
-                    dpi=1000,
+                    dpi=_MAP_DPI,
                     )
         # Clear results for constructing the next figure
         plt.cla()
@@ -517,13 +521,13 @@ def savefig_location_annotations_on_map(annotations: list,
             ann = str(ann)  # cast to string if required
             ax.annotate(ann,
                         m(lon, lat),
-                        fontsize=2,
+                        fontsize=_ANN_FONT_SIZE,
                         )
 
         # Save the figure
         os.makedirs(path, exist_ok=True)
         plt.savefig(os.path.join(path, f'{country}.png'),
-                    dpi=500,
+                    dpi=_MAP_DPI,
                     )
         # Clear results for constructing the next figure
         plt.cla()

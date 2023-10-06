@@ -354,6 +354,10 @@ class Dataset:
         ixs = [(year, loc) for year, loc in self.get_train_indices() if year in years]
         return [self[index] for index in ixs]
 
+    def get_test_data_in_years(self, years: list):
+        ixs = [(year, loc) for year, loc in self.get_test_indices() if year in years]
+        return [self[index] for index in ixs]
+
     def save(self, fn: str):
         path = os.path.join(config.PATH_DATASET_DIR, type(self).__name__)
         os.makedirs(path, exist_ok=True)
@@ -364,7 +368,7 @@ class Dataset:
     def load(cls, fn: str) -> 'Dataset':
         path = os.path.join(config.PATH_DATASET_DIR, cls.__name__)
         assert os.path.isfile(os.path.join(path, fn))
-        with open(os.path.isfile(os.path.join(path, fn)), 'rb') as f:
+        with open(os.path.join(path, fn), 'rb') as f:
             dataset = pickle.load(f)
         return dataset
 
@@ -414,16 +418,17 @@ def split_location_token(location: str):
 
 def _save_debug_dataset():
     from sklearn.model_selection import train_test_split
-
+    # Create a small subset of the data for testing and save it
     dataset = Dataset(
         year_split=train_test_split(Dataset.YEAR_RANGE),
         locations_train=['Japan/Abashiri'],
         locations_test=['Japan/Abashiri'],
+        include_temperature=True,
     )
     dataset.save('dataset_temperature_debug.pickle')
 
 
-def _load_debug_dataset():
+def load_debug_dataset():
     return Dataset.load('dataset_temperature_debug.pickle')
 
 
@@ -433,3 +438,5 @@ if __name__ == '__main__':
     print(Dataset.DOYS)
     print(Dataset.SEASON_LENGTH - 1 - Dataset.DOY_SHIFT)
     print(Dataset.doy_to_index(1))
+
+    _save_debug_dataset()

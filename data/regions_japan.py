@@ -265,9 +265,39 @@ LOCATION_VARIETY = {
     # 'Japan/Kutchan': ,  # Kutchan observed Ezoyamazakura until 1994 and Someiyoshino from 1995 to 2006 .
 }
 
+"""
+
+    Predefined groups
+
+    0: 'Hokkaido',
+    1: 'Tohoku',
+    2: 'Hokuriku',
+    3: 'Kanto-Koshin',
+    4: 'Kinki',
+    5: 'Chugoku',
+    6: 'Tokai',
+    7: 'Shikoku',
+    8: 'Kyushu-North',
+    9: 'Kyushu-South-Amami',
+    10: 'Okinawa',
+
+"""
+
 LOCATIONS_WO_OKINAWA = {k: v for k, v in LOCATIONS.items() if v != 10}
 
 LOCATIONS_JAPAN_YEDOENIS = {k: v for k, v in LOCATION_VARIETY.items() if v == 0}
+
+LOCATIONS_HOKKAIDO = {k: v for k, v in LOCATIONS.items() if v == 0}
+LOCATIONS_TOHOKU = {k: v for k, v in LOCATIONS.items() if v == 1}
+LOCATIONS_HOKURIKU = {k: v for k, v in LOCATIONS.items() if v == 2}
+LOCATIONS_KANTO_KOSHIN = {k: v for k, v in LOCATIONS.items() if v == 3}
+LOCATIONS_KINKI = {k: v for k, v in LOCATIONS.items() if v == 4}
+LOCATIONS_CHUGOKU = {k: v for k, v in LOCATIONS.items() if v == 5}
+LOCATIONS_TOKAI = {k: v for k, v in LOCATIONS.items() if v == 6}
+LOCATIONS_SHIKOKU = {k: v for k, v in LOCATIONS.items() if v == 7}
+LOCATIONS_KYUSHU_NORTH = {k: v for k, v in LOCATIONS.items() if v == 8}
+LOCATIONS_KYUSHU_SOUTH_AMAMI = {k: v for k, v in LOCATIONS.items() if v == 9}
+LOCATIONS_OKINAWA = {k: v for k, v in LOCATIONS.items() if v == 10}
 
 
 if __name__ == '__main__':

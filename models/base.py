@@ -80,3 +80,10 @@ class BaseModel:
     def is_in_mode_test(self) -> bool:
         return self._mode == BaseModel.MODE_TEST
 
+    def save(self, model_name: str):
+        raise NotImplementedError
+
+    @classmethod
+    def load(cls, model_name: str) -> 'BaseModel':
+        raise NotImplementedError
+
