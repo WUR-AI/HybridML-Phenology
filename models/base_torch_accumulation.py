@@ -34,7 +34,9 @@ class BaseTorchAccumulationModel(BaseTorchModel):
     def f_units_chill_growth(self, xs: dict, tb: torch.Tensor):
         raise NotImplementedError
 
-    def forward(self, xs: dict,
+    def forward(self,
+                xs: dict,
+                soft: bool = True,
                 ) -> tuple:
 
         th_c, th_g, tb_g = self.f_parameters(xs)
@@ -61,8 +63,22 @@ class BaseTorchAccumulationModel(BaseTorchModel):
                                                augment_gradient=self.TH_AUG_GRAD,
                                                )
 
-        ix = (1 - req_g).sum(dim=-1)
+        """
+            Compute the blooming ix 
+        """
+        # soft=False  # TODO -- remove
+
+        if soft:
+            ix = (1 - req_g).sum(dim=-1)
+        else:
+            mask = (units_g_cs >= th_g).to(torch.int)
+            ix = (1 - mask).sum(dim=-1)
+
+        # If blooming never occurred -> set it to the end of the season
         ix = ix.clamp(min=0, max=Dataset.SEASON_LENGTH - 1)
+
+        # ix = (1 - req_g).sum(dim=-1)
+        # ix = ix.clamp(min=0, max=Dataset.SEASON_LENGTH - 1)
 
         return ix, {
             # 'units_c': units_c,
@@ -71,6 +87,20 @@ class BaseTorchAccumulationModel(BaseTorchModel):
             'req_g': req_g,
             # 'units_g_masked': units_g_masked,
         }
+
+    # @staticmethod
+    # def _compute_ix(units_g_cs: torch.Tensor, req_g: torch.Tensor, beta: torch.Tensor, soft: bool = True,):
+    #
+    #     if soft:
+    #         ix = (1 - req_g).sum(dim=-1)
+    #     else:
+    #         ix = (1 - torch.where(units_g_cs >= beta)).sum(dim=-1)
+    #
+    #     # If blooming never occurred -> set it to the end of the season
+    #     ix = ix.clamp(min=0, max=Dataset.SEASON_LENGTH - 1)
+    #
+    #     return ix
+
 
     @classmethod
     def _path_params_dir(cls) -> str:
