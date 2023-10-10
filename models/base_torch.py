@@ -45,12 +45,16 @@ class BaseTorchModel(BaseModel, nn.Module):
         return ix, True, {'forward_pass': info}
 
     def batch_predict_ix(self, xs: list) -> list:
-        xs = [self._transform(x) for x in xs]
-        xs = [self._normalize_sample(x) for x in xs]
-        xs = self._collate_fn(xs)
-        ixs, info = self(xs)
-        # ixs = [int(ix.item()) for ix in ixs]
-        ixs = self._ixs_to_int(ixs)
+        assert self._fit_info is not None
+
+        with torch.no_grad():
+            xs = [self._transform(x) for x in xs]
+            xs = [self._normalize_sample(x) for x in xs]
+            xs = self._collate_fn(xs)
+            ixs, info = self(xs)
+            # ixs = [int(ix.item()) for ix in ixs]
+            ixs = self._ixs_to_int(ixs)
+
         return [(ix, True, info) for ix in ixs]
 
     @staticmethod

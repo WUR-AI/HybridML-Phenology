@@ -23,7 +23,7 @@ class BaseModel:
 
     def predict_ix(self, x: dict) -> tuple:
         """
-        Make a bloom doy prediction
+        Make a bloom doy prediction (as index in the season)
         :param x: a dict containing a single data point
         :return: a three-tuple of:
             - the index (int) of the bloom doy (in the given temperature time series)

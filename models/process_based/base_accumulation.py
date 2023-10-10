@@ -16,11 +16,29 @@ from models.base import BaseModel
 
 class BaseAccumulationModel(BaseModel):
 
+    """
+        Abstract base class for a process-based model for blooming DOY prediction
+
+        Accumulates daily chill units until some threshold has been reached
+        Subsequently accumulates daily growth units until some threshold is reached
+
+        Blooming occurs when both thresholds are reached
+
+        The functions that determine daily chill and growth units are left unimplemented
+
+    """
+
     def __init__(self,
                  threshold_chill: float,
                  threshold_growth: float,
                  t_base: float,
                  ):
+        """
+        Create a new process-based model for blooming DOY prediction
+        :param threshold_chill: the number of chill units that need to be accumulated for fulfilling the requirement
+        :param threshold_growth: the number of growth units that need to be accumulated for fulfilling the requirement
+        :param t_base: parameter controlling chill/growth accumulation
+        """
         super().__init__()
         self._threshold_chill = threshold_chill
         self._threshold_growth = threshold_growth
@@ -52,73 +70,77 @@ class BaseAccumulationModel(BaseModel):
     def predict_ix(self, x: dict) -> tuple:
         return self._predict_ix_alt(x)
 
-        ts = x['temperature']
-
-        # Temperatures np.ndarray ts is assumed to have shape (t, n), where
-        #   t is the number of days
-        #   n is the number of temperature measurements per day
-
-        # Compute the chill units that are acquired for each day
-        cu = self.chill_units(ts)
-
-        # Compute the cumulative chill units over time
-        cus = cu.cumsum(axis=-1)
-
-        # Obtain the first index where the cumulative chill units exceeds some threshold
-        ixs, = np.where(cus >= self._threshold_chill)
-        if len(ixs) == 0:  # If the threshold is never reached, return -1
-            info = {
-                'chill_units': cu,
-                'bloom': False,
-            }
-            return BaseModel.NO_FIT_IX, False, info
-
-        # If we reached this point -> chill requirement has been met
-
-        # Get the first index where the chill threshold is exceeded
-        ix_cr = ixs.min(axis=-1)
-
-        # Select the remaining temperature time series over which the gdd units should be computed
-        # That is, all days after meeting the chill requirement
-        ts = ts[ix_cr:]
-        # Chill units are accumulated until the requirement has been met
-        # Omit the other dates
-        cu = cu[:ix_cr]
-
-        # Compute the growth units that are acquired for each day
-        gu = self.growth_units(ts)
-
-        # Compute the cumulative growth units over time
-        gus = gu.cumsum(axis=-1)
-
-        # Get the first index where the cumulative growth units exceeds some threshold
-        ixs, = np.where(gus >= self._threshold_growth)
-        if len(ixs) == 0:  # If the threshold is never reached, return -1
-            info = {
-                'ix_cr': ix_cr,
-                'chill_units': cu,
-                'growth_units': gu,
-                'bloom': False,
-            }
-            return BaseModel.NO_FIT_IX, False, info
-
-        # If we reached this point -> both chill and growth requirement have been met
-
-        # Get the first index at which the threshold was reached
-        ix_gr = ixs.min(axis=-1)
-
-        # The bloom index is when both chill and growth requirements have been met
-        ix_bloom = ix_gr + ix_cr
-
-        info = {
-            'ix_bloom': ix_bloom,
-            'ix_cr': ix_cr,
-            'chill_units': cu,
-            'growth_units': gu,
-            'bloom': True,
-        }
-
-        return ix_bloom, True, info
+        # """
+        #     Legacy code
+        # """
+        #
+        # ts = x['temperature']
+        #
+        # # Temperatures np.ndarray ts is assumed to have shape (t, n), where
+        # #   t is the number of days
+        # #   n is the number of temperature measurements per day
+        #
+        # # Compute the chill units that are acquired for each day
+        # cu = self.chill_units(ts)
+        #
+        # # Compute the cumulative chill units over time
+        # cus = cu.cumsum(axis=-1)
+        #
+        # # Obtain the first index where the cumulative chill units exceeds some threshold
+        # ixs, = np.where(cus >= self._threshold_chill)
+        # if len(ixs) == 0:  # If the threshold is never reached, return -1
+        #     info = {
+        #         'chill_units': cu,
+        #         'bloom': False,
+        #     }
+        #     return BaseModel.NO_FIT_IX, False, info
+        #
+        # # If we reached this point -> chill requirement has been met
+        #
+        # # Get the first index where the chill threshold is exceeded
+        # ix_cr = ixs.min(axis=-1)
+        #
+        # # Select the remaining temperature time series over which the gdd units should be computed
+        # # That is, all days after meeting the chill requirement
+        # ts = ts[ix_cr:]
+        # # Chill units are accumulated until the requirement has been met
+        # # Omit the other dates
+        # cu = cu[:ix_cr]
+        #
+        # # Compute the growth units that are acquired for each day
+        # gu = self.growth_units(ts)
+        #
+        # # Compute the cumulative growth units over time
+        # gus = gu.cumsum(axis=-1)
+        #
+        # # Get the first index where the cumulative growth units exceeds some threshold
+        # ixs, = np.where(gus >= self._threshold_growth)
+        # if len(ixs) == 0:  # If the threshold is never reached, return -1
+        #     info = {
+        #         'ix_cr': ix_cr,
+        #         'chill_units': cu,
+        #         'growth_units': gu,
+        #         'bloom': False,
+        #     }
+        #     return BaseModel.NO_FIT_IX, False, info
+        #
+        # # If we reached this point -> both chill and growth requirement have been met
+        #
+        # # Get the first index at which the threshold was reached
+        # ix_gr = ixs.min(axis=-1)
+        #
+        # # The bloom index is when both chill and growth requirements have been met
+        # ix_bloom = ix_gr + ix_cr
+        #
+        # info = {
+        #     'ix_bloom': ix_bloom,
+        #     'ix_cr': ix_cr,
+        #     'chill_units': cu,
+        #     'growth_units': gu,
+        #     'bloom': True,
+        # }
+        #
+        # return ix_bloom, True, info
 
     @property
     def growth_requirement(self) -> float:

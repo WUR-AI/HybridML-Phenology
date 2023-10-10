@@ -18,9 +18,10 @@ if __name__ == '__main__':
 
     min_temperature = -40
     max_temperature = 60
-    step_temperature = 1
+    step_temperature = .5  # dont change! -- values are rounded to nearest halves
 
-    range_temperature = list(range(min_temperature, max_temperature, step_temperature))
+    # range_temperature = list(range(min_temperature, max_temperature, step_temperature))
+    range_temperature = np.arange(min_temperature, max_temperature, step_temperature)
     range_ix_temperature = {v: i for i, v in enumerate(range_temperature)}
 
     parser = argparse.ArgumentParser()
@@ -30,7 +31,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     model_cls = NNChillModel
-    model_name = model_cls.__name__ + '_GlobalJapanYedoenis'
+    model_name = model_cls.__name__ + '_GlobalYedoenis_holdout'
 
     model_name = model_name or model_cls.__name__
 
@@ -86,8 +87,12 @@ if __name__ == '__main__':
             # print(t.shape)
             # print(t)
 
-            t_min = int(t.min().item() + .5)
-            t_max = int(t.max().item() + .5)
+            # t_min = int(t.min().item() + .5)
+            # t_max = int(t.max().item() + .5)
+
+            t_min = round(t.min().item() * 2) / 2
+            t_max = round(t.max().item() * 2) / 2
+
 
             # print(t_min, t_max)
             # print(u.item())
@@ -102,9 +107,14 @@ if __name__ == '__main__':
         k: np.std(v) if len(v) != 0 else 0 for k, v in entries.items()
     }
 
+    entries_count = {
+        k: len(v) for k, v in entries.items()
+    }
+
     grid = np.zeros((len(range_temperature), len(range_temperature)))
-    # for (t_min, t_max), v in entries_mean.items():
-    for (t_min, t_max), v in entries_std.items():
+    for (t_min, t_max), v in entries_mean.items():
+    # for (t_min, t_max), v in entries_std.items():
+    # for (t_min, t_max), v in entries_count.items():
         grid[range_ix_temperature[t_min], range_ix_temperature[t_max]] = v
 
     # grid[range_ix_temperature[-30], range_ix_temperature[30]] = 1
@@ -131,6 +141,7 @@ if __name__ == '__main__':
     extent = [left, right, bottom, top]
 
     plt.imshow(grid, extent=extent)
+    # plt.savefig('temp_response.png')
     plt.savefig('temp.png')
 
 
