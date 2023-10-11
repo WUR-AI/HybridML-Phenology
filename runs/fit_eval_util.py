@@ -335,6 +335,8 @@ _PARAMETER_MODELS = [
     ParamNet,  # Parameterize using NN
 ]
 
+_PARAMETER_MODELS_DEFAULT = _PARAMETER_MODELS[0]
+
 _PARAMETER_MODELS_KEYS_TO_CLS = {
     cls.__name__: cls for cls in _PARAMETER_MODELS
 }
@@ -348,7 +350,7 @@ def configure_argument_parser_parameter_model(parser: argparse.ArgumentParser) -
     """
     parser.add_argument('--parameter_model',
                         type=str,
-                        default=_PARAMETER_MODELS[0],
+                        default=_PARAMETER_MODELS_DEFAULT.__name__,
                         choices=list(_PARAMETER_MODELS_KEYS_TO_CLS.keys()),
                         help='Model that should be used to map locations to parameter values. If none is specified, '
                              'each location is mapped to a tuple of parameters.',
