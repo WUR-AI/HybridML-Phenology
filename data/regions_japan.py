@@ -144,9 +144,9 @@ LOCATIONS = {
 
 VARIETIES = {
     0: 'someiyoshino',  # Prunus Yedoenis
-    1: 'ezoyamazakura',
+    1: 'ezoyamazakura',  # Prunus sargentii
     2: 'hikanzakura',  # Prunus campanulata Maxim
-    3: 'chishimazakura', # Prunus nipponica Matsum
+    3: 'chishimazakura',  # Prunus nipponica Matsum
 }
 
 # Source: https://www.data.jma.go.jp/sakura/data/sakura004_07.html
@@ -286,6 +286,9 @@ LOCATION_VARIETY = {
 LOCATIONS_WO_OKINAWA = {k: v for k, v in LOCATIONS.items() if v != 10}
 
 LOCATIONS_JAPAN_YEDOENIS = {k: v for k, v in LOCATION_VARIETY.items() if v == 0}
+LOCATIONS_JAPAN_SARGENTII = {k: v for k, v in LOCATION_VARIETY.items() if v == 1}
+LOCATIONS_JAPAN_CAMPANULATA = {k: v for k, v in LOCATION_VARIETY.items() if v == 2}
+LOCATIONS_JAPAN_NIPPONICA = {k: v for k, v in LOCATION_VARIETY.items() if v == 3}
 
 LOCATIONS_HOKKAIDO = {k: v for k, v in LOCATIONS.items() if v == 0}
 LOCATIONS_TOHOKU = {k: v for k, v in LOCATIONS.items() if v == 1}

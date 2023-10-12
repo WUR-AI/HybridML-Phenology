@@ -10,13 +10,88 @@ import config
 from data.bloom_doy import get_locations
 
 
-class ParameterModel:
+class ParameterModel(nn.Module):
 
-    def get_parameters(self, xs: dict):
+    def get_parameters(self, xs: dict) -> tuple:
         raise NotImplementedError
 
 
-class ParameterMapping(ParameterModel, nn.Module):
+class AccumulationParameterMapping(ParameterModel):
+
+    def __init__(self,
+                 location_groups: dict,
+                 init_val_th_c: float = 0.0,
+                 init_val_th_g: float = 0.0,
+                 init_val_tb_g: float = 0.0,
+                 ):
+        super().__init__()
+
+        self._thc_map = ParameterMapping(
+            location_groups,
+            init_val=init_val_th_c,
+        )
+
+        self._thg_map = ParameterMapping(
+            location_groups,
+            init_val=init_val_th_g,
+        )
+
+        self._tbg_map = ParameterMapping(
+            location_groups,
+            init_val=init_val_tb_g,
+        )
+
+    def forward(self, xs: dict):
+
+        thc = self._thc_map(xs)
+        thg = self._thg_map(xs)
+        tbg = self._tbg_map(xs)
+
+        thc = self._scale_param(thc, 1)
+        thg = self._scale_param(thg, 1)
+        tbg = self._scale_param(tbg, 20)
+
+        return thc, thg, tbg
+
+    @staticmethod
+    def _scale_param(p: torch.Tensor, c) -> torch.Tensor:
+        p = _modified_relu(p)
+        return p * c
+
+
+class LocalAccumulationParameterMapping(AccumulationParameterMapping):
+
+    def __init__(self,
+                 locations: list,
+                 init_val_th_c: float = 0.0,
+                 init_val_th_g: float = 0.0,
+                 init_val_tb_g: float = 0.0,
+                 ):
+        super().__init__(
+            {loc: i for i, loc in enumerate(locations)},
+            init_val_th_c,
+            init_val_th_g,
+            init_val_tb_g,
+        )
+
+
+class GlobalAccumulationParameterMapping(AccumulationParameterMapping):
+
+    def __init__(self,
+                 locations: list,
+                 init_val_th_c: float = 0.0,
+                 init_val_th_g: float = 0.0,
+                 init_val_tb_g: float = 0.0,
+                 ):
+        super().__init__(
+            {loc: 0 for loc in locations},
+            init_val_th_c,
+            init_val_th_g,
+            init_val_tb_g,
+        )
+
+
+class ParameterMapping(nn.Module):
 
     def __init__(self,
                  location_groups: dict,
@@ -38,9 +113,6 @@ class ParameterMapping(ParameterModel, nn.Module):
             [torch.tensor(float(init_val), requires_grad=True) for _ in range(n_groups)]
         )
 
-    def get_parameters(self, xs: dict):
-        return self(xs)
-
     def forward(self, xs: dict):
         locations = xs['location']
 
@@ -48,26 +120,7 @@ class ParameterMapping(ParameterModel, nn.Module):
                        dim=0,
                        )
 
-    @staticmethod
-    def _scale_thc(thc: torch.Tensor):
-        w_thc = 1
-        thc = _modified_relu(thc)
-        thc = thc * w_thc
-        return thc
-
-    @staticmethod
-    def _scale_thg(thg: torch.Tensor):
-        w_thg = 1
-        thg = _modified_relu(thg)
-        thg = thg * w_thg
-        return thg
-
-    @staticmethod
-    def _scale_tbg(tbg: torch.Tensor):
-        w_tbg = 20
-        tbg = _modified_relu(tbg)
-        tbg = tbg * w_tbg
-        return tbg
+        return ps
 
 
 def _modified_relu(x: torch.Tensor):
