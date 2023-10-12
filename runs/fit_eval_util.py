@@ -14,7 +14,9 @@ from evaluation.evaluation import evaluate
 from models.base import BaseModel
 from models.base_torch import BaseTorchModel, DummyTorchModel
 from models.base_torch_accumulation import BaseTorchAccumulationModel
-from models.components.param import ParamNet, LocalParams, GlobalParams
+from models.components.param_v2 import LocalAccumulationParameterMapping, GlobalAccumulationParameterMapping, \
+    AccumulationParameterMapping
+# from models.components.param import ParamNet, LocalParams, GlobalParams
 from models.diff_utah import DiffUtahModel
 from models.mean import MeanModel
 from models.nn_chill_operator import NNChillModel
@@ -34,11 +36,10 @@ _LOCATION_GROUPS = {
     'switzerland': data.bloom_doy.get_locations_switzerland(),
     'south_korea': data.bloom_doy.get_locations_south_korea(),
     'usa': data.bloom_doy.get_locations_usa(),
-    'japan_wo_okinawa': list(data.regions_japan.LOCATIONS_WO_OKINAWA.keys()),
-    'japan_yedoenis': list(data.regions_japan.LOCATIONS_JAPAN_YEDOENIS.keys()),
     'japan_south_korea': data.bloom_doy.get_locations_japan() + data.bloom_doy.get_locations_south_korea(),
     'japan_switzerland': data.bloom_doy.get_locations_japan() + data.bloom_doy.get_locations_switzerland(),
     'no_us': data.bloom_doy.get_locations_japan() + data.bloom_doy.get_locations_switzerland() + data.bloom_doy.get_locations_south_korea(),
+
     'japan_hokkaido': list(data.regions_japan.LOCATIONS_HOKKAIDO.keys()),
     'japan_tohoku': list(data.regions_japan.LOCATIONS_TOHOKU.keys()),
     'japan_hokuriku': list(data.regions_japan.LOCATIONS_HOKURIKU.keys()),
@@ -50,6 +51,14 @@ _LOCATION_GROUPS = {
     'japan_kyushu_north': list(data.regions_japan.LOCATIONS_KYUSHU_NORTH.keys()),
     'japan_kyushu_south_amami': list(data.regions_japan.LOCATIONS_KYUSHU_SOUTH_AMAMI.keys()),
     'japan_okinawa': list(data.regions_japan.LOCATIONS_OKINAWA.keys()),
+
+    'japan_wo_okinawa': list(data.regions_japan.LOCATIONS_WO_OKINAWA.keys()),
+
+    'japan_yedoenis': list(data.regions_japan.LOCATIONS_JAPAN_YEDOENIS.keys()),
+    'japan_sargentii': list(data.regions_japan.LOCATIONS_JAPAN_SARGENTII.keys()),
+
+    'japan_yedoenis_sargentii': list(data.regions_japan.LOCATIONS_JAPAN_YEDOENIS.keys()) + list(data.regions_japan.LOCATIONS_JAPAN_SARGENTII.keys()),
+
 }
 
 """
@@ -329,16 +338,26 @@ def configure_argparser_fit_torch(parser: argparse.ArgumentParser) -> argparse.A
     return parser
 
 
-_PARAMETER_MODELS = [
-    LocalParams,  # Parameter set per location
-    GlobalParams,  # Shared parameter set for all locations
-    ParamNet,  # Parameterize using NN
-]
+# _PARAMETER_MODELS = [
+#     LocalAccumulationParameterMapping,  # Parameter set per location
+#     GlobalAccumulationParameterMapping,  # Shared parameter set for all locations
+#
+#     LocalParams,  # Parameter set per location
+#     GlobalParams,  # Shared parameter set for all locations
+#     ParamNet,  # Parameterize using NN
+# ]
 
-_PARAMETER_MODELS_DEFAULT = _PARAMETER_MODELS[0]
+# _PARAMETER_MODELS_DEFAULT = _PARAMETER_MODELS[0]
 
+# _PARAMETER_MODELS_KEYS_TO_CLS = {
+#     cls.__name__: cls for cls in _PARAMETER_MODELS
+# }
 _PARAMETER_MODELS_KEYS_TO_CLS = {
-    cls.__name__: cls for cls in _PARAMETER_MODELS
+    'local': LocalAccumulationParameterMapping,  # Parameter set per location
+    'global': GlobalAccumulationParameterMapping,  # Shared parameter set for all locations
+
+    'japan_cultivars': AccumulationParameterMapping,  # Grouped parameters for cultivars in japan
+
 }
 
 
@@ -350,7 +369,7 @@ def configure_argument_parser_parameter_model(parser: argparse.ArgumentParser) -
     """
     parser.add_argument('--parameter_model',
                         type=str,
-                        default=_PARAMETER_MODELS_DEFAULT.__name__,
+                        default='local',
                         choices=list(_PARAMETER_MODELS_KEYS_TO_CLS.keys()),
                         help='Model that should be used to map locations to parameter values. If none is specified, '
                              'each location is mapped to a tuple of parameters.',
@@ -519,13 +538,23 @@ def fit_torch_model_using_args(model_cls: callable,
 
     model_kwargs = dict()
     if issubclass(model_cls, BaseTorchAccumulationModel):
-        if args.parameter_model is None or _PARAMETER_MODELS_KEYS_TO_CLS[args.parameter_model] == LocalParams:
-            locations = _LOCATION_GROUPS[args.locations]
-            model_kwargs['param_model'] = LocalParams(locations=locations)
-        elif _PARAMETER_MODELS_KEYS_TO_CLS[args.parameter_model] == GlobalParams:
-            model_kwargs['param_model'] = GlobalParams()
-        elif _PARAMETER_MODELS_KEYS_TO_CLS[args.parameter_model] == ParamNet:
-            model_kwargs['param_model'] = ParamNet()
+        locations = _LOCATION_GROUPS[args.locations]
+
+        if args.parameter_model == 'local':
+            model_kwargs['param_model'] = LocalAccumulationParameterMapping(locations)
+        if args.parameter_model == 'global':
+            model_kwargs['param_model'] = GlobalAccumulationParameterMapping(locations)
+        if args.parameter_model == 'japan_cultivars':
+            model_kwargs['param_model'] = AccumulationParameterMapping(data.regions_japan.LOCATION_VARIETY)
+
+
+            # if args.parameter_model is None or _PARAMETER_MODELS_KEYS_TO_CLS[args.parameter_model] == LocalParams:
+        #     locations = _LOCATION_GROUPS[args.locations]
+        #     model_kwargs['param_model'] = LocalParams(locations=locations)
+        # elif _PARAMETER_MODELS_KEYS_TO_CLS[args.parameter_model] == GlobalParams:
+        #     model_kwargs['param_model'] = GlobalParams()
+        # elif _PARAMETER_MODELS_KEYS_TO_CLS[args.parameter_model] == ParamNet:
+        #     model_kwargs['param_model'] = ParamNet()
         else:
             raise ConfigException(f'Cannot configure parameter model "{args.parameter_model}"')
 

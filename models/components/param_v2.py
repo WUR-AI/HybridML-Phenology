@@ -10,6 +10,9 @@ import config
 from data.bloom_doy import get_locations
 
 
+# TODO -- save parameters to df
+
+
 class ParameterModel(nn.Module):
 
     def get_parameters(self, xs: dict) -> tuple:
@@ -40,6 +43,9 @@ class AccumulationParameterMapping(ParameterModel):
             location_groups,
             init_val=init_val_tb_g,
         )
+
+    def get_parameters(self, xs: dict) -> tuple:
+        return self(xs)
 
     def forward(self, xs: dict):
 
