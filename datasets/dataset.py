@@ -260,6 +260,14 @@ class Dataset:
         return list(set([year for year, _ in self._data_doy.index.values]))
 
     @property
+    def years_train(self) -> list:
+        return list(self._years_train)
+
+    @property
+    def years_test(self) -> list:
+        return list(self._years_test)
+
+    @property
     def countries(self):
         return list(set([split_location_token(loc)[0] for _, loc in self._data_doy.index.values]))
 

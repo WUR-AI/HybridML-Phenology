@@ -194,7 +194,8 @@ def configure_argparser_dataset(parser: argparse.ArgumentParser) -> argparse.Arg
     """
     parser.add_argument('--debug',
                         action='store_true',  # TODO -- check if saved debug dataset already exists, now it is assumed it does exist
-                        help='If set, a small subset of the data is loaded (which is much faster)')
+                        help='If set, a small subset of the data is loaded (which is much faster)',
+                        )
 
     parser.add_argument('--include_temperature',
                         action='store_true',
@@ -352,7 +353,7 @@ def configure_argparser_fit_torch(parser: argparse.ArgumentParser) -> argparse.A
 # _PARAMETER_MODELS_KEYS_TO_CLS = {
 #     cls.__name__: cls for cls in _PARAMETER_MODELS
 # }
-_PARAMETER_MODELS_KEYS_TO_CLS = {
+_PARAMETER_MODELS_KEYS_TO_CLS = {  # TODO -- different -- this is redundant
     'local': LocalAccumulationParameterMapping,  # Parameter set per location
     'global': GlobalAccumulationParameterMapping,  # Shared parameter set for all locations
 
@@ -542,9 +543,9 @@ def fit_torch_model_using_args(model_cls: callable,
 
         if args.parameter_model == 'local':
             model_kwargs['param_model'] = LocalAccumulationParameterMapping(locations)
-        if args.parameter_model == 'global':
+        elif args.parameter_model == 'global':
             model_kwargs['param_model'] = GlobalAccumulationParameterMapping(locations)
-        if args.parameter_model == 'japan_cultivars':
+        elif args.parameter_model == 'japan_cultivars':
             model_kwargs['param_model'] = AccumulationParameterMapping(data.regions_japan.LOCATION_VARIETY)
 
 

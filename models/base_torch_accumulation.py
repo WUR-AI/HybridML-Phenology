@@ -12,7 +12,8 @@ import config
 from datasets.dataset import Dataset
 from models.base_torch import BaseTorchModel
 from models.components.logistic import SoftThreshold
-from models.components.param import ParamNet, LocalParams, ParameterModel
+from models.components.param_v2 import ParameterModel
+# from models.components.param import ParamNet, LocalParams, ParameterModel
 from util.torch import batch_tensors
 
 
@@ -28,6 +29,8 @@ class BaseTorchAccumulationModel(BaseTorchModel):
         super().__init__()
         self._param_model = param_model
 
+        self._debug_mode = False  # TODO
+
     def f_parameters(self, xs: dict) -> tuple:
         return self._param_model.get_parameters(xs)
 
@@ -38,6 +41,8 @@ class BaseTorchAccumulationModel(BaseTorchModel):
                 xs: dict,
                 soft: bool = True,
                 ) -> tuple:
+
+        debug_info = dict()
 
         th_c, th_g, tb_g = self.f_parameters(xs)
 
@@ -66,7 +71,7 @@ class BaseTorchAccumulationModel(BaseTorchModel):
         """
             Compute the blooming ix 
         """
-        # soft=False  # TODO -- remove
+        # soft=False  # TODO -- remove? make instance variable?
 
         if soft:
             ix = (1 - req_g).sum(dim=-1)
@@ -80,12 +85,28 @@ class BaseTorchAccumulationModel(BaseTorchModel):
         # ix = (1 - req_g).sum(dim=-1)
         # ix = ix.clamp(min=0, max=Dataset.SEASON_LENGTH - 1)
 
+        optional_info = dict()  # TODO -- loss to enforce threshold
+        if self._debug_mode:
+
+            debug_info['req_c'] = req_c.cpu().detach().numpy()
+            debug_info['req_g'] = req_g.cpu().detach().numpy()
+            debug_info['units_c'] = units_c.cpu().detach().numpy()
+            debug_info['units_g'] = units_g.cpu().detach().numpy()
+            debug_info['units_g_masked'] = units_g_masked.cpu().detach().numpy()
+            debug_info['th_c'] = th_c.detach().cpu().detach().numpy()
+            debug_info['th_g'] = th_g.detach().cpu().detach().numpy()
+            debug_info['tb_g'] = tb_g.detach().cpu().detach().numpy()
+
+            optional_info['debug'] = debug_info
+
         return ix, {
             # 'units_c': units_c,
             # 'units_g': units_g,
             'req_c': req_c,
             'req_g': req_g,
             # 'units_g_masked': units_g_masked,
+
+            **optional_info,
         }
 
     # @staticmethod
@@ -105,6 +126,16 @@ class BaseTorchAccumulationModel(BaseTorchModel):
     @classmethod
     def _path_params_dir(cls) -> str:
         return os.path.join(config.PATH_PARAMS_DIR, cls.__name__)
+
+    def freeze_operator_weights(self):
+        for p in self.parameters():
+            p.requires_grad = False
+        for p in self._param_model.parameters():
+            p.requires_grad = True
+
+    def unfreeze_operator_weights(self):
+        for p in self.parameters():
+            p.requires_grad = True
 
     # def loss(self, xs: dict, scale: float = 1e-3) -> tuple:
     #     loss, info = super().loss(xs, scale)

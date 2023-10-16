@@ -61,11 +61,15 @@ class BaseAccumulationModel(BaseModel):
         gus = gu.cumsum(axis=-1)
         r_g = np.where(gus >= self._threshold_growth, 1, 0)
 
+        ix_chill = (1-r_c).sum()
         ix_bloom = (1-r_g).sum()
 
+        ix_chill = np.minimum(ix_chill, Dataset.SEASON_LENGTH - 1)
         ix_bloom = np.minimum(ix_bloom, Dataset.SEASON_LENGTH - 1)
 
-        return ix_bloom, True, {}
+        return ix_bloom, True, {
+            'ix_chill': ix_chill,  # index where chill requirement is met
+        }
 
     def predict_ix(self, x: dict) -> tuple:
         return self._predict_ix_alt(x)
