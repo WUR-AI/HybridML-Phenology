@@ -4,6 +4,7 @@ from itertools import product
 import numpy as np
 import pandas as pd
 import torch
+import torch.nn.functional as F
 from sklearn.metrics import mean_squared_error, r2_score
 from tqdm import tqdm
 import multiprocessing as mp
@@ -108,6 +109,15 @@ class BaseTorchAccumulationModel(BaseTorchModel):
 
             **optional_info,
         }
+
+    # def loss(self, xs: dict, scale: float = 1e-3) -> tuple:
+    #     ys_pred, info = self(xs)
+    #     ys_true = xs['bloom_ix'].to(config.TORCH_DTYPE).to(ys_pred.device)
+    #     loss = F.mse_loss(ys_pred, ys_true) * scale
+    #     # loss = F.l1_loss(ys_pred, ys_true) * scale
+    #     return loss, {
+    #         'forward_pass': info,
+    #     }
 
     # @staticmethod
     # def _compute_ix(units_g_cs: torch.Tensor, req_g: torch.Tensor, beta: torch.Tensor, soft: bool = True,):
