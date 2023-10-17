@@ -68,7 +68,7 @@ class BaseAccumulationModel(BaseModel):
         ix_bloom = np.minimum(ix_bloom, Dataset.SEASON_LENGTH - 1)
 
         return ix_bloom, True, {
-            'ix_chill': ix_chill,
+            'ix_chill': ix_chill,  # index where chill requirement is met
         }
 
     def predict_ix(self, x: dict) -> tuple:

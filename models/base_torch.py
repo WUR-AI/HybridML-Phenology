@@ -106,6 +106,7 @@ class BaseTorchModel(BaseModel, nn.Module):
 
         model = cls(**model_kwargs).to(device).to(config.TORCH_DTYPE)
 
+        # TODO -- show model name in progress bar?
 
         model._fit_info = info = dict()
 
