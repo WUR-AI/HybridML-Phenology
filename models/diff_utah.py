@@ -1,7 +1,8 @@
 import torch
 
 from models.base_torch_accumulation import BaseTorchAccumulationModel
-from models.components.param import ParameterModel
+from models.components.param_v2 import ParameterModel
+# from models.components.param import ParameterModel
 from models.components.torch_phenology_pb import TorchGDD, LogisticUtahChillModule
 
 

@@ -54,6 +54,7 @@ _LOCATION_GROUPS = {
 
     'japan_wo_okinawa': list(data.regions_japan.LOCATIONS_WO_OKINAWA.keys()),
 
+    'japan_known_variety': list(data.regions_japan.LOCATION_VARIETY.keys()),  # Locations in Japan for which the variety is known
     'japan_yedoenis': list(data.regions_japan.LOCATIONS_JAPAN_YEDOENIS.keys()),
     'japan_sargentii': list(data.regions_japan.LOCATIONS_JAPAN_SARGENTII.keys()),
 
