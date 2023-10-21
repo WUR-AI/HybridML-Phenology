@@ -111,10 +111,20 @@ class BaseTorchAccumulationModel(BaseTorchModel):
         }
 
     # def loss(self, xs: dict, scale: float = 1e-3) -> tuple:
-    #     ys_pred, info = self(xs)
-    #     ys_true = xs['bloom_ix'].to(config.TORCH_DTYPE).to(ys_pred.device)
-    #     loss = F.mse_loss(ys_pred, ys_true) * scale
-    #     # loss = F.l1_loss(ys_pred, ys_true) * scale
+    #     _, info = self(xs)
+    #
+    #     req_g_pred = info['req_g']
+    #     bs = req_g_pred.size(0)
+    #
+    #     ys_true = xs['bloom_ix'].to(config.TORCH_DTYPE).to(req_g_pred.device)
+    #
+    #     req_g_true = torch.cat(
+    #         [torch.arange(Dataset.SEASON_LENGTH).unsqueeze(0) for _ in range(bs)], dim=0
+    #     ).to(req_g_pred.device)
+    #     req_g_true = (req_g_true >= ys_true.view(-1, 1)).to(config.TORCH_DTYPE)
+    #
+    #     loss = F.binary_cross_entropy(req_g_pred, req_g_true)
+    #
     #     return loss, {
     #         'forward_pass': info,
     #     }
