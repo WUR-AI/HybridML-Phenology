@@ -55,13 +55,14 @@ class AccumulationParameterMapping(ParameterModel):
 
         thc = self._scale_param(thc, 1)
         thg = self._scale_param(thg, 1)
-        tbg = self._scale_param(tbg, 20)
+        # tbg = self._scale_param(tbg, 20)
+        tbg = self._scale_param(tbg, 1)
 
         return thc, thg, tbg
 
     @staticmethod
     def _scale_param(p: torch.Tensor, c) -> torch.Tensor:
-        p = _modified_relu(p)
+        p = _modified_abs(p)
         return p * c
 
 
@@ -129,6 +130,7 @@ class ParameterMapping(nn.Module):
         return ps
 
 
-def _modified_relu(x: torch.Tensor):
-    w = 1
-    return F.relu(x) + w * (x - x.detach().clone())
+def _modified_abs(x: torch.Tensor):
+    epsilon = 1e-5  # Add small epsilon to gradient to avoid getting stuck at 0
+    # return F.relu(x) + epsilon * (x - x.detach().clone())
+    return torch.abs(x) + epsilon * (x - x.detach().clone())

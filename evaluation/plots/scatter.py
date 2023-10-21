@@ -3,7 +3,7 @@ from collections import defaultdict
 
 import numpy as np
 from matplotlib import pyplot as plt
-from sklearn.metrics import r2_score, mean_squared_error
+from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 from tqdm import tqdm
 
 from datasets.dataset import split_location_token
@@ -25,13 +25,14 @@ def savefig_scatter_doys(doys_true: list,
 
     r2 = r2_score(doys_true, doys_pred)
     rmse = mean_squared_error(doys_true, doys_pred, squared=False)
+    mae = mean_absolute_error(doys_true, doys_pred)
 
     ax.plot(np.arange(0, 200), np.arange(0, 200), '--', color='grey')
 
     ax.scatter(doys_pred,
                doys_true,
                c=colors,
-               label=f'r2 {r2:.2f}, rmse {rmse:.2f}, n={len(doys_true)})',
+               label=f'r2 {r2:.2f}, rmse {rmse:.2f}, mae {mae:.2f}, n={len(doys_true)})',
                s=3,
                alpha=0.3,
                )
@@ -80,16 +81,18 @@ def savefig_scatter_doys_global(doys_true: list,
 
     r2 = r2_score(doys_true, doys_pred)
     rmse = mean_squared_error(doys_true, doys_pred, squared=False)
+    mae = mean_absolute_error(doys_true, doys_pred)
 
     ax.plot(np.arange(0, 200), np.arange(0, 200), '--', color='grey')
 
     for country in tqdm(doys_true_nat.keys(), desc='Making global scatter plot'):
         r2_nat = r2_score(doys_true_nat[country], doys_pred_nat[country])
         rmse_nat = mean_squared_error(doys_true_nat[country], doys_pred_nat[country], squared=False)
+        mae_nat = mean_absolute_error(doys_true_nat[country], doys_pred_nat[country])
 
         ax.scatter(doys_pred_nat[country],
                    doys_true_nat[country],
-                   label=f'{country} (r2 {r2_nat:.2f}, rmse {rmse_nat:.2f}, n={len(doys_true_nat[country])})',
+                   label=f'{country} (r2 {r2_nat:.2f}, rmse {rmse_nat:.2f}, mae {mae_nat:.2f}, n={len(doys_true_nat[country])})',
                    s=3,
                    alpha=0.3,
                    )
@@ -99,7 +102,7 @@ def savefig_scatter_doys_global(doys_true: list,
 
     plt.legend()
 
-    plt.title(f'Global DOY predictions (r2 {r2:.2f}, rmse {rmse:.2f}, n={len(doys_true)})')
+    plt.title(f'Global DOY predictions (r2 {r2:.2f}, rmse {rmse:.2f}, mae {mae:.2f}, n={len(doys_true)})')
 
     plt.savefig(os.path.join(path_global, fn_global))
 
@@ -115,13 +118,14 @@ def savefig_scatter_doys_global(doys_true: list,
 
         r2_nat = r2_score(doys_true_nat[country], doys_pred_nat[country])
         rmse_nat = mean_squared_error(doys_true_nat[country], doys_pred_nat[country], squared=False)
+        mae_nat = mean_absolute_error(doys_true_nat[country], doys_pred_nat[country])
 
         savefig_scatter_doys(
             doys_true_nat[country],
             doys_pred_nat[country],
             path=path_global,
             fn=fn_nat,
-            title=f'{country} DOY predictions (r2 {r2_nat:.2f}, rmse {rmse_nat:.2f}, n={len(doys_true_nat[country])})',
+            title=f'{country} DOY predictions (r2 {r2_nat:.2f}, rmse {rmse_nat:.2f}, mae {mae_nat:.2f}, n={len(doys_true_nat[country])})',
         )
 
 
@@ -162,11 +166,12 @@ def savefig_scatter_doys_local(doys_true: list,
 
         r2_loc = r2_score(doys_true_loc[location], doys_pred_loc[location])
         rmse_loc = mean_squared_error(doys_true_loc[location], doys_pred_loc[location], squared=False)
+        mae_loc = mean_absolute_error(doys_true_loc[location], doys_pred_loc[location],)
 
         savefig_scatter_doys(
             doys_true_loc[location],
             doys_pred_loc[location],
             path=os.path.join(path_local, country.lower()),
             fn=fn_loc,
-            title=f'{location} DOY predictions (r2 {r2_loc:.2f}, rmse {rmse_loc:.2f}, n={len(doys_true_loc[location])})',
+            title=f'{location} DOY predictions (r2 {r2_loc:.2f}, rmse {rmse_loc:.2f}, mae {mae_loc:.2f}, n={len(doys_true_loc[location])})',
         )
