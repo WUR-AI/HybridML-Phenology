@@ -91,7 +91,7 @@ LOCATIONS = {
     'Japan/Iwamizawa': 0,
     'Japan/Sumoto': 4,
     'Japan/Hachijojima': 3,
-    # 'Japan/Hachijojima': 10,  # TODO -- remove
+    # 'Japan/Hachijojima': 10,  # TODO
     'Japan/Miyakojima': 10,
     'Japan/Nagoya-2': 6,
     'Japan/Matsumoto': 3,
@@ -101,7 +101,7 @@ LOCATIONS = {
     'Japan/Hamamatsu': 6,
     'Japan/Kofu': 3,
     'Japan/Tanegashima': 9,
-    # 'Japan/Tanegashima': 10,  # TODO - - remove
+    # 'Japan/Tanegashima': 10,  # TODO
     'Japan/Kochi-2': 7,
     'Japan/Sapporo': 0,
     'Japan/Yakushima-1': 9,
