@@ -21,16 +21,20 @@ from util.torch import batch_tensors
 class BaseTorchAccumulationModel(BaseTorchModel):
 
     SLOPE = 50
-    SCALE_CHILL = Dataset.SEASON_LENGTH * 24
+    SCALE_CHILL = Dataset.SEASON_LENGTH * 24  # TODO -- same scale
     SCALE_GROWTH = Dataset.SEASON_LENGTH
 
-    TH_AUG_GRAD = False
+    TH_AUG_GRAD = False  # TODO -- remove
 
     def __init__(self, param_model: ParameterModel):
         super().__init__()
         self._param_model = param_model
 
         self._debug_mode = False  # TODO
+
+    @property
+    def parameter_model(self) -> ParameterModel:
+        return self._param_model
 
     def f_parameters(self, xs: dict) -> tuple:
         return self._param_model.get_parameters(xs)
@@ -86,7 +90,7 @@ class BaseTorchAccumulationModel(BaseTorchModel):
         # ix = (1 - req_g).sum(dim=-1)
         # ix = ix.clamp(min=0, max=Dataset.SEASON_LENGTH - 1)
 
-        optional_info = dict()  # TODO -- loss to enforce threshold
+        optional_info = dict()
         if self._debug_mode:
 
             debug_info['req_c'] = req_c.cpu().detach().numpy()
@@ -141,7 +145,6 @@ class BaseTorchAccumulationModel(BaseTorchModel):
     #     ix = ix.clamp(min=0, max=Dataset.SEASON_LENGTH - 1)
     #
     #     return ix
-
 
     @classmethod
     def _path_params_dir(cls) -> str:

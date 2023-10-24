@@ -60,6 +60,15 @@ class AccumulationParameterMapping(ParameterModel):
 
         return thc, thg, tbg
 
+    def ungroup(self) -> None:
+        """
+        Replace the current parameter mappings by ones without location grouping (in-place)
+        :return: None
+        """
+        self._thc_map = self._thc_map.as_ungrouped()
+        self._thg_map = self._thg_map.as_ungrouped()
+        self._tbg_map = self._tbg_map.as_ungrouped()
+
     @staticmethod
     def _scale_param(p: torch.Tensor, c) -> torch.Tensor:
         p = _modified_abs(p)
@@ -103,22 +112,46 @@ class ParameterMapping(nn.Module):
     def __init__(self,
                  location_groups: dict,
                  init_val: float = 0.0,
+                 init_val_group: dict = None,
                  ):
         super().__init__()
+        # Make sure all group are assigned an initial value
+        assert init_val_group is None or all([group in init_val_group.keys() for group in set(location_groups.values())])
 
         n_groups = len(set(location_groups.values()))
 
+        # Rename all groups to some index
         group_to_ix = {
             g: i for i, g in enumerate(set(location_groups.values()))
         }
 
+        # Map all locations to these indices
         self._loc_ixs = {
             loc: group_to_ix[g] for loc, g in location_groups.items()
         }
 
-        self._ps = nn.ParameterList(
-            [torch.tensor(float(init_val), requires_grad=True) for _ in range(n_groups)]
-        )
+        if init_val_group is None:
+            self._ps = nn.ParameterList(
+                [torch.tensor(float(init_val), requires_grad=True) for _ in range(n_groups)]
+            )
+        else:
+            self._ps = nn.ParameterList(
+                [torch.tensor(float(init_val_group[g]), requires_grad=True) for g in group_to_ix.keys()]
+            )
+
+    @property
+    def locations(self):
+        return list(self._loc_ixs.keys())
+
+    @property
+    def location_group_ixs(self) -> dict:
+        return dict(self._loc_ixs)
+
+    @property
+    def location_values(self) -> dict:
+        return {
+            loc: self._ps[ix].item() for loc, ix in self.location_group_ixs.items()
+        }
 
     def forward(self, xs: dict):
         locations = xs['location']
@@ -128,6 +161,22 @@ class ParameterMapping(nn.Module):
                        )
 
         return ps
+
+    def as_ungrouped(self) -> 'ParameterMapping':
+        """
+        Recreate the current parameter mapping without grouped locations
+        That is, each location is assigned one value (the one of the group its currently assigned to)
+        :return: a new ParameterMapping object without location groups
+        """
+        # Assign an index (group) to all locations individually
+        loc_ixs = {loc: ix for ix, loc in enumerate(self.locations)}
+        # Get the values that are currently assigned to all locations
+        loc_vals = self.location_values
+        # Create a new parameter mapping without location grouping
+        return ParameterMapping(
+            location_groups=loc_ixs,
+            init_val_group={ix: loc_vals[loc] for loc, ix in loc_ixs.items()}
+        )
 
 
 def _modified_abs(x: torch.Tensor):

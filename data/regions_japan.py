@@ -5,8 +5,9 @@
     https://www.data.jma.go.jp/stats/data/en/index.html
 
 """
+from data.bloom_doy import get_locations_south_korea
 
-REGIONS = {
+REGIONS_JAPAN = {
     0: 'Hokkaido',
     1: 'Tohoku',
     2: 'Hokuriku',
@@ -24,7 +25,7 @@ REGIONS = {
     Map locations to climate region ids
 """
 
-LOCATIONS = {
+LOCATIONS_REGIONS_JAPAN = {
     'Japan/Kushiro-1': 0,
     'Japan/Naze': 10,  # Officially classified as 9 -- climate is closer to 10
     'Japan/Miyakejima': 3,
@@ -150,7 +151,7 @@ VARIETIES = {
 }
 
 # Source: https://www.data.jma.go.jp/sakura/data/sakura004_07.html
-LOCATION_VARIETY = {
+LOCATION_VARIETY_JAPAN = {
     'Japan/Kushiro-1': 1,
     'Japan/Naze': 2,
     'Japan/Miyakejima': 0,
@@ -265,6 +266,15 @@ LOCATION_VARIETY = {
     # 'Japan/Kutchan': ,  # Kutchan observed Ezoyamazakura until 1994 and Someiyoshino from 1995 to 2006 .
 }
 
+LOCATION_VARIETY_SOUTH_KOREA = {  # TODO -- verify
+    loc: 0 for loc in get_locations_south_korea()
+}
+
+LOCATION_VARIETY = {
+    **LOCATIONS_REGIONS_JAPAN,
+    **LOCATION_VARIETY_SOUTH_KOREA,
+}
+
 """
 
     Predefined groups
@@ -283,37 +293,37 @@ LOCATION_VARIETY = {
 
 """
 
-LOCATIONS_WO_OKINAWA = {k: v for k, v in LOCATIONS.items() if v != 10}
+LOCATIONS_WO_OKINAWA = {k: v for k, v in LOCATIONS_REGIONS_JAPAN.items() if v != 10}
 
-LOCATIONS_JAPAN_YEDOENIS = {k: v for k, v in LOCATION_VARIETY.items() if v == 0}
-LOCATIONS_JAPAN_SARGENTII = {k: v for k, v in LOCATION_VARIETY.items() if v == 1}
-LOCATIONS_JAPAN_CAMPANULATA = {k: v for k, v in LOCATION_VARIETY.items() if v == 2}
-LOCATIONS_JAPAN_NIPPONICA = {k: v for k, v in LOCATION_VARIETY.items() if v == 3}
+LOCATIONS_JAPAN_YEDOENIS = {k: v for k, v in LOCATION_VARIETY_JAPAN.items() if v == 0}
+LOCATIONS_JAPAN_SARGENTII = {k: v for k, v in LOCATION_VARIETY_JAPAN.items() if v == 1}
+LOCATIONS_JAPAN_CAMPANULATA = {k: v for k, v in LOCATION_VARIETY_JAPAN.items() if v == 2}
+LOCATIONS_JAPAN_NIPPONICA = {k: v for k, v in LOCATION_VARIETY_JAPAN.items() if v == 3}
 
-LOCATIONS_HOKKAIDO = {k: v for k, v in LOCATIONS.items() if v == 0}
-LOCATIONS_TOHOKU = {k: v for k, v in LOCATIONS.items() if v == 1}
-LOCATIONS_HOKURIKU = {k: v for k, v in LOCATIONS.items() if v == 2}
-LOCATIONS_KANTO_KOSHIN = {k: v for k, v in LOCATIONS.items() if v == 3}
-LOCATIONS_KINKI = {k: v for k, v in LOCATIONS.items() if v == 4}
-LOCATIONS_CHUGOKU = {k: v for k, v in LOCATIONS.items() if v == 5}
-LOCATIONS_TOKAI = {k: v for k, v in LOCATIONS.items() if v == 6}
-LOCATIONS_SHIKOKU = {k: v for k, v in LOCATIONS.items() if v == 7}
-LOCATIONS_KYUSHU_NORTH = {k: v for k, v in LOCATIONS.items() if v == 8}
-LOCATIONS_KYUSHU_SOUTH_AMAMI = {k: v for k, v in LOCATIONS.items() if v == 9}
-LOCATIONS_OKINAWA = {k: v for k, v in LOCATIONS.items() if v == 10}
+LOCATIONS_HOKKAIDO = {k: v for k, v in LOCATIONS_REGIONS_JAPAN.items() if v == 0}
+LOCATIONS_TOHOKU = {k: v for k, v in LOCATIONS_REGIONS_JAPAN.items() if v == 1}
+LOCATIONS_HOKURIKU = {k: v for k, v in LOCATIONS_REGIONS_JAPAN.items() if v == 2}
+LOCATIONS_KANTO_KOSHIN = {k: v for k, v in LOCATIONS_REGIONS_JAPAN.items() if v == 3}
+LOCATIONS_KINKI = {k: v for k, v in LOCATIONS_REGIONS_JAPAN.items() if v == 4}
+LOCATIONS_CHUGOKU = {k: v for k, v in LOCATIONS_REGIONS_JAPAN.items() if v == 5}
+LOCATIONS_TOKAI = {k: v for k, v in LOCATIONS_REGIONS_JAPAN.items() if v == 6}
+LOCATIONS_SHIKOKU = {k: v for k, v in LOCATIONS_REGIONS_JAPAN.items() if v == 7}
+LOCATIONS_KYUSHU_NORTH = {k: v for k, v in LOCATIONS_REGIONS_JAPAN.items() if v == 8}
+LOCATIONS_KYUSHU_SOUTH_AMAMI = {k: v for k, v in LOCATIONS_REGIONS_JAPAN.items() if v == 9}
+LOCATIONS_OKINAWA = {k: v for k, v in LOCATIONS_REGIONS_JAPAN.items() if v == 10}
 
 
 if __name__ == '__main__':
     from evaluation.plots.maps import savefig_location_annotations_on_map
 
-    _locations = list(LOCATION_VARIETY.keys())
+    _locations = list(LOCATION_VARIETY_JAPAN.keys())
     _cmap = {
         0: 'red',
         1: 'blue',
         2: 'green',
         3: 'purple',
     }
-    _colors = [_cmap[LOCATION_VARIETY[_loc]] for _loc in _locations]
+    _colors = [_cmap[LOCATION_VARIETY_JAPAN[_loc]] for _loc in _locations]
 
     savefig_location_annotations_on_map(
         # annotations=[''] * len(_locations),

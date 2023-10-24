@@ -49,7 +49,7 @@ def group_items_per_region_japan(locations: list,
         country, site = split_location_token(location)
         if country != 'Japan':
             continue
-        region_id = LOCATIONS[location]
+        region_id = LOCATIONS_REGIONS_JAPAN[location]
         groups[region_id].append(item)
 
     return groups

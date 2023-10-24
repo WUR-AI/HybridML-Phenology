@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from data.regions_japan import LOCATION_VARIETY, VARIETIES
+from data.regions_japan import LOCATION_VARIETY_JAPAN, VARIETIES
 from util.torch import batch_tensors
 
 from util.photoperiod import photoperiod
@@ -318,7 +318,7 @@ class DegreeDaysV(nn.Module):
         # ts has shape (batch_size, season length, num daily temperature measurements)
 
         locations = xs['location']
-        vs = [LOCATION_VARIETY[loc] for loc in locations]
+        vs = [LOCATION_VARIETY_JAPAN[loc] for loc in locations]
         vs = torch.tensor(vs)
         vs = F.one_hot(vs, num_classes=len(VARIETIES)).to(ts.device).to(ts.dtype)
         vs = vs.unsqueeze(1).expand(-1, ts.size(1), -1)

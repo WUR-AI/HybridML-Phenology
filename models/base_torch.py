@@ -26,6 +26,8 @@ class BaseTorchModel(BaseModel, nn.Module):
         # When fitting the model the following variable will store a dict containing this info
         self._fit_info = None
 
+        # TODO -- store train locations/years -- use for checks for data leakage when evaluating
+
     def forward(self, xs: dict) -> tuple:
         raise NotImplementedError
 
@@ -94,9 +96,10 @@ class BaseTorchModel(BaseModel, nn.Module):
             scheduler_step_size: int = None,
             scheduler_decay: float = 0.5,
             clip_gradient: float = None,
-            model_kwargs: dict = None,
-            f_optim: callable = torch.optim.SGD,
+            f_optim: callable = torch.optim.SGD,  # TODO -- default is none -> init sgd with lr 0.1 or adam
             optim_kwargs: dict = None,
+            model: 'BaseTorchModel' = None,
+            model_kwargs: dict = None,
             # optim_kwargs: dict = {'lr': 0.1},
             device: str = torch.device('cpu'),
             ) -> tuple:
@@ -104,13 +107,14 @@ class BaseTorchModel(BaseModel, nn.Module):
         model_kwargs = model_kwargs or dict()
         optim_kwargs = optim_kwargs or dict()
 
-        model = cls(**model_kwargs).to(device).to(config.TORCH_DTYPE)
+        model = (model or cls(**model_kwargs)).to(device).to(config.TORCH_DTYPE)
 
         # TODO -- show model name in progress bar?
 
         model._fit_info = info = dict()
 
         info['dataset_type'] = type(dataset).__name__
+        # TODO -- store normalization parameters
 
         dataset_wrapped = TorchDatasetWrapper(dataset)
 

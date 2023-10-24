@@ -54,7 +54,7 @@ _LOCATION_GROUPS = {
 
     'japan_wo_okinawa': list(data.regions_japan.LOCATIONS_WO_OKINAWA.keys()),
 
-    'japan_known_variety': list(data.regions_japan.LOCATION_VARIETY.keys()),  # Locations in Japan for which the variety is known
+    'japan_known_variety': list(data.regions_japan.LOCATION_VARIETY_JAPAN.keys()),  # Locations in Japan for which the variety is known
     'japan_yedoenis': list(data.regions_japan.LOCATIONS_JAPAN_YEDOENIS.keys()),
     'japan_sargentii': list(data.regions_japan.LOCATIONS_JAPAN_SARGENTII.keys()),
 
@@ -359,7 +359,7 @@ _PARAMETER_MODELS_KEYS_TO_CLS = {  # TODO -- different -- this is redundant
     'global': GlobalAccumulationParameterMapping,  # Shared parameter set for all locations
 
     'japan_cultivars': AccumulationParameterMapping,  # Grouped parameters for cultivars in japan
-
+    'known_cultivars': AccumulationParameterMapping,  # Grouped parameters for cultivars
 }
 
 
@@ -547,8 +547,9 @@ def fit_torch_model_using_args(model_cls: callable,
         elif args.parameter_model == 'global':
             model_kwargs['param_model'] = GlobalAccumulationParameterMapping(locations)
         elif args.parameter_model == 'japan_cultivars':
-            model_kwargs['param_model'] = AccumulationParameterMapping(data.regions_japan.LOCATION_VARIETY)
-
+            model_kwargs['param_model'] = AccumulationParameterMapping(data.regions_japan.LOCATION_VARIETY_JAPAN)
+        elif args.parameter_model == 'known_cultivars':
+            model_kwargs['param_model'] = AccumulationParameterMapping(data.regions_japan.LOCATION_VARIETY)  # TODO
 
             # if args.parameter_model is None or _PARAMETER_MODELS_KEYS_TO_CLS[args.parameter_model] == LocalParams:
         #     locations = _LOCATION_GROUPS[args.locations]
