@@ -206,6 +206,8 @@ def savefig_locations_on_map(locations: list,
     :param path:
     """
 
+    os.makedirs(path, exist_ok=True)
+
     # Get all location coordinates
     location_data = get_locations_coordinates()
     lats = location_data.loc[locations]['lat'].values
@@ -245,7 +247,7 @@ def savefig_locations_on_map(locations: list,
                         fontsize=_ANN_FONT_SIZE,
                         )
         # Save the figure
-        plt.savefig(path,
+        plt.savefig(os.path.join(path, f'{country}.png'),
                     dpi=_MAP_DPI,
                     )
         # Clear results for constructing the next figure
@@ -535,6 +537,14 @@ def savefig_location_annotations_on_map(annotations: list,
 
 
 # TODO -- regional plots
+
+
+if __name__ == '__main__':
+    from data.bloom_doy import get_locations
+    savefig_locations_on_map(
+        get_locations(),
+        os.path.join(config.PATH_FIGURES_DIR, 'location_maps')
+    )
 
 
 # if __name__ == '__main__':

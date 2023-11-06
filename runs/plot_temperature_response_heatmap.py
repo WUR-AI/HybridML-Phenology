@@ -31,7 +31,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     model_cls = NNChillModel
-    model_name = model_cls.__name__ + '_GlobalYedoenis_holdout'
+    model_name = model_cls.__name__ + '_seed18_Japan'
 
     model_name = model_name or model_cls.__name__
 
@@ -142,7 +142,7 @@ if __name__ == '__main__':
 
     plt.imshow(grid, extent=extent)
     # plt.savefig('temp_response.png')
-    plt.savefig('temp.png')
+    plt.savefig('temp_std.png')
 
 
 
