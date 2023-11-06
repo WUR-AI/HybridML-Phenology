@@ -2,6 +2,7 @@ import os.path
 
 import numpy as np
 import pandas as pd
+import torch
 from scipy.stats import kendalltau
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from tabulate import tabulate
@@ -66,6 +67,10 @@ def evaluate(model: BaseModel,
     """
 
     model.set_mode_test()
+
+    # If the model is a PyTorch model -> load on cpu
+    if isinstance(model, torch.nn.Module):
+        model.cpu()
 
     """
         Run model on train data

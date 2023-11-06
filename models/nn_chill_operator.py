@@ -13,8 +13,14 @@ class NNChillModel(BaseTorchAccumulationModel):
 
     def __init__(self,
                  param_model: ParameterModel,
+                 soft_threshold_at_eval: bool = True,
+                 loss_f: str = BaseTorchAccumulationModel.LOSSES[0],
                  ):
-        super().__init__(param_model)
+        super().__init__(
+            param_model=param_model,
+            soft_threshold_at_eval=soft_threshold_at_eval,
+            loss_f=loss_f,
+        )
         # self._chill_model = DegreeDaysCNN()
         self._chill_model = DegreeDaysDNN(hidden_size=64)
         # self._chill_model = DegreeDaysV(hidden_size=64)
@@ -27,42 +33,42 @@ class NNChillModel(BaseTorchAccumulationModel):
         return cus, gus
 
 
-class NNGrowthModel(BaseTorchAccumulationModel):
-
-    def __init__(self,
-                 param_model: ParameterModel,
-                 ):
-        super().__init__(param_model)
-        self._growth_model = DegreeDaysCNN()
-        self._chill_model = LogisticUtahChillModule()
-
-    def f_units_chill_growth(self, xs: dict, tb: torch.Tensor):
-
-        cus = self._chill_model(xs)
-        gus = self._growth_model(xs)
-
-        return cus, gus
-
-
-class NNChillGrowthModel(BaseTorchAccumulationModel):
-
-    def __init__(self,
-                 param_model: ParameterModel,
-                 ):
-        super().__init__(param_model)
-        self._model = DegreeDaysCNN(num_out_channels=2)
-
-    def f_units_chill_growth(self, xs: dict, tb: torch.Tensor):
-
-        us = self._model(xs)
-
-        # print(us.shape)
-
-        cus, gus = torch.tensor_split(us, 2, dim=1)
-
-        # print(cus.shape)
-
-        return cus, gus
+# class NNGrowthModel(BaseTorchAccumulationModel):
+#
+#     def __init__(self,
+#                  param_model: ParameterModel,
+#                  ):
+#         super().__init__(param_model)
+#         self._growth_model = DegreeDaysCNN()
+#         self._chill_model = LogisticUtahChillModule()
+#
+#     def f_units_chill_growth(self, xs: dict, tb: torch.Tensor):
+#
+#         cus = self._chill_model(xs)
+#         gus = self._growth_model(xs)
+#
+#         return cus, gus
+#
+#
+# class NNChillGrowthModel(BaseTorchAccumulationModel):
+#
+#     def __init__(self,
+#                  param_model: ParameterModel,
+#                  ):
+#         super().__init__(param_model)
+#         self._model = DegreeDaysCNN(num_out_channels=2)
+#
+#     def f_units_chill_growth(self, xs: dict, tb: torch.Tensor):
+#
+#         us = self._model(xs)
+#
+#         # print(us.shape)
+#
+#         cus, gus = torch.tensor_split(us, 2, dim=1)
+#
+#         # print(cus.shape)
+#
+#         return cus, gus
 
 # if __name__ == '__main__':
 #

@@ -1,29 +1,99 @@
-import torch.nn
+import argparse
 
-from datasets.dataset import Dataset
+from runs.args_util.args_dataset import get_configured_dataset, configure_argparser_dataset
+from runs.args_util.args_evaluation import evaluate_model_using_args, configure_argparser_evaluation
+from runs.args_util.args_main import set_config_using_args, configure_argparser_main
+from runs.args_util.args_model import fit_model, MODELS_KEYS_TO_CLS, configure_argparser_model
 
-from models.base import BaseModel
-from runs.fit_eval_util import get_args, get_configured_dataset, validate_args, fit_model, set_config_using_args, \
-    evaluate_model_using_args
+"""
+
+    Fit and evaluate a model
+    
+"""
+
+
+def _configure_argparser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
+    """
+    Configure an argument parser to parse arguments for the fit/eval run
+    """
+    # Configure it to parse arguments related to the main flow of the program
+    # (including the selection of which model to train)
+    configure_argparser_main(parser)
+    # Configure it to parse arguments related to building the dataset
+    configure_argparser_dataset(parser)
+    # Configure it to parse arguments related to the evaluation process
+    configure_argparser_evaluation(parser)
+    # Configure it to parse arguments related to the run procedure
+    parser.add_argument('--skip_fit',
+                        action='store_true',
+                        help='If set, no model will be trained but instead will be loaded from disk',
+                        )
+    parser.add_argument('--skip_eval',
+                        action='store_true',
+                        help='If set, the trained/loaded model will not be evaluated',
+                        )
+    parser.add_argument('--model_cls',
+                        type=str,
+                        choices=list(MODELS_KEYS_TO_CLS.keys()),
+                        required=True,
+                        help='Specify the model class that is to be trained/evaluated',
+                        )
+    parser.add_argument('--model_name',
+                        type=str,
+                        help='Optionally specify a name for the model. If none is provided the model class will be '
+                             'used. The name is used for storing model weights and evaluation files',
+                        )
+
+    # Parse the arguments that are known so far -- the remaining configuration is based on these initial arguments
+    known_args, _ = parser.parse_known_args()
+
+    # Configure the parser based on the model selection
+    configure_argparser_model(MODELS_KEYS_TO_CLS[known_args.model_cls], parser)
+
+    return parser
+
+
+def _get_args() -> argparse.Namespace:
+    """
+    Configure an argument parser and use it to obtain arguments for configuring the run
+    """
+
+    description = 'Fit and evaluate a model'
+
+    # Initialize a parser
+    parser = argparse.ArgumentParser(description=description)
+    # Configure it
+    _configure_argparser(parser)
+    # Parse all arguments
+    args = parser.parse_args()
+
+    # Obtain the model that was selected to be trained/evaluated
+    model_cls = MODELS_KEYS_TO_CLS[args.model_cls]
+    # Overwrite the model class keyword with the class itself
+    args.model_cls = model_cls
+
+    # Perform some checks for validity of the run configuration
+    # validate_args(args)  # TODO
+
+    # Return the final arguments
+    return args
+
 
 if __name__ == '__main__':
 
     # Get the provided program arguments
-    args = get_args()
-    # Perform some checks for validity of the run configuration
-    validate_args(args)
+    args = _get_args()
+
     # Set global config (e.g. seeds)
     set_config_using_args(args)
 
     # Obtain the model class that will be trained/evaluated
     model_cls = args.model_cls
-    assert issubclass(model_cls, BaseModel)
     # Get the model name (if specified, otherwise use the class name)
     model_name = args.model_name or model_cls.__name__
 
     # Configure the dataset based on the provided arguments
     dataset, _ = get_configured_dataset(args)
-    assert isinstance(dataset, Dataset)
 
     # If training should be skipped -> load the model from disk
     if args.skip_fit:
@@ -31,11 +101,6 @@ if __name__ == '__main__':
     # Otherwise, fit a new model
     else:
         model, _ = fit_model(args, dataset)
-
-        # If the model is a PyTorch model -> load on cpu
-        if isinstance(model, torch.nn.Module):
-            model.cpu()
-
         # Save the trained model
         model.save(model_name)
 
@@ -47,4 +112,3 @@ if __name__ == '__main__':
             model_name,
             dataset,
         )
-

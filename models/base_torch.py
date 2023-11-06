@@ -181,6 +181,7 @@ class BaseTorchModel(BaseModel, nn.Module):
         fn = f'{model_name}.pth'
         os.makedirs(os.path.join(config.PATH_PARAMS_DIR, type(self).__name__), exist_ok=True)
         path = os.path.join(config.PATH_PARAMS_DIR, type(self).__name__, fn)
+        self.cpu()
         torch.save(self, path)
 
     @classmethod
