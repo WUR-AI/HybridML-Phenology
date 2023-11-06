@@ -8,7 +8,7 @@ from datasets.dataset import Dataset
 from datasets.dataset_torch import TorchDatasetWrapper
 from models.process_based.chill_hours import LocalChillHoursModel
 from models.process_based.utah_chill import LocalUtahChillModel
-from runs.fit_eval_util import configure_argparser_dataset, get_configured_dataset
+from runs.args_util.args_dataset import configure_argparser_dataset, get_configured_dataset
 
 if __name__ == '__main__':
 

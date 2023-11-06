@@ -37,25 +37,10 @@ class GeneralizedLogistic(nn.Module):
                    a,
                    b,
                    o,
-                   augment_gradient: bool = False,
                    ):
         out = o * F.sigmoid(a * (ts - b))
-        if augment_gradient:
-            out = out + 1 * (ts - ts.detach().clone())
         return out
         # return o / (1 + torch.exp(-a * (ts - b.view(-1, 1))))
-
-    @staticmethod
-    def sigmoid(ts: torch.Tensor,
-                augment_gradient: bool = False,
-                ):
-        return GeneralizedLogistic.f_logistic(
-            ts,
-            1,
-            0,
-            1,
-            augment_gradient,
-        )
 
 
 class SoftThreshold(GeneralizedLogistic):
@@ -79,6 +64,5 @@ class SoftThreshold(GeneralizedLogistic):
     def f_soft_threshold(ts: torch.Tensor,
                          a,
                          b,
-                         augment_gradient: bool = False,
                          ):
-        return SoftThreshold.f_logistic(ts, a, b, 1, augment_gradient=augment_gradient,)
+        return SoftThreshold.f_logistic(ts, a, b, 1)

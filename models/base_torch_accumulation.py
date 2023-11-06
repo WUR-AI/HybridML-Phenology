@@ -21,15 +21,34 @@ from util.torch import batch_tensors
 class BaseTorchAccumulationModel(BaseTorchModel):
 
     SLOPE = 50
-    SCALE_CHILL = Dataset.SEASON_LENGTH * 24  # TODO -- same scale
+    SCALE_CHILL = Dataset.SEASON_LENGTH
     SCALE_GROWTH = Dataset.SEASON_LENGTH
 
-    TH_AUG_GRAD = False  # TODO -- remove
+    LOSSES = [
+        'mse',  # Mean Squared Error
+        'bce',  # Binary Cross-Entropy
+    ]
 
-    def __init__(self, param_model: ParameterModel):
+    def __init__(self,
+                 param_model: ParameterModel,
+                 soft_threshold_at_eval: bool = True,
+                 loss_f: str = LOSSES[0],
+                 ):
+        assert loss_f in BaseTorchAccumulationModel.LOSSES
         super().__init__()
         self._param_model = param_model
 
+        # When set to False -> hard threshold (i.e. step function) is used during inference in evaluation mode
+        self._soft_threshold_at_eval = soft_threshold_at_eval
+        # When set to False -> hard threshold is used in the forward pass
+        # This variable is set in the functions setting train/test modes for this model
+        # Its behaviour depends on the value of self._soft_threshold_at_eval
+        self._soft_threshold = True
+
+        # Set the loss function that is to be used for optimization
+        self._loss_f = loss_f
+
+        # The model outputs intermediate variables during debug mode
         self._debug_mode = False  # TODO
 
     @property
@@ -44,7 +63,6 @@ class BaseTorchAccumulationModel(BaseTorchModel):
 
     def forward(self,
                 xs: dict,
-                soft: bool = True,
                 ) -> tuple:
 
         debug_info = dict()
@@ -53,15 +71,14 @@ class BaseTorchAccumulationModel(BaseTorchModel):
 
         units_c, units_g = self.f_units_chill_growth(xs, tb_g)
 
-        units_c /= BaseTorchAccumulationModel.SCALE_CHILL
-        units_g /= BaseTorchAccumulationModel.SCALE_GROWTH
+        units_c = units_c / BaseTorchAccumulationModel.SCALE_CHILL
+        units_g = units_g / BaseTorchAccumulationModel.SCALE_GROWTH
 
         units_c_cs = units_c.cumsum(dim=-1)
 
         req_c = SoftThreshold.f_soft_threshold(units_c_cs,
                                                BaseTorchAccumulationModel.SLOPE,
                                                th_c,
-                                               augment_gradient=self.TH_AUG_GRAD,
                                                )
 
         units_g_masked = units_g * req_c
@@ -70,15 +87,13 @@ class BaseTorchAccumulationModel(BaseTorchModel):
         req_g = SoftThreshold.f_soft_threshold(units_g_cs,
                                                BaseTorchAccumulationModel.SLOPE,
                                                th_g,
-                                               augment_gradient=self.TH_AUG_GRAD,
                                                )
 
         """
             Compute the blooming ix 
         """
-        # soft=False  # TODO -- remove? make instance variable?
 
-        if soft:
+        if self._soft_threshold:
             ix = (1 - req_g).sum(dim=-1)
         else:
             mask = (units_g_cs >= th_g).to(torch.int)
@@ -114,24 +129,31 @@ class BaseTorchAccumulationModel(BaseTorchModel):
             **optional_info,
         }
 
-    # def loss(self, xs: dict, scale: float = 1e-3) -> tuple:
-    #     _, info = self(xs)
-    #
-    #     req_g_pred = info['req_g']
-    #     bs = req_g_pred.size(0)
-    #
-    #     ys_true = xs['bloom_ix'].to(config.TORCH_DTYPE).to(req_g_pred.device)
-    #
-    #     req_g_true = torch.cat(
-    #         [torch.arange(Dataset.SEASON_LENGTH).unsqueeze(0) for _ in range(bs)], dim=0
-    #     ).to(req_g_pred.device)
-    #     req_g_true = (req_g_true >= ys_true.view(-1, 1)).to(config.TORCH_DTYPE)
-    #
-    #     loss = F.binary_cross_entropy(req_g_pred, req_g_true)
-    #
-    #     return loss, {
-    #         'forward_pass': info,
-    #     }
+    def loss(self, xs: dict, scale: float = 1e-3) -> tuple:
+        if self._loss_f == 'mse':
+            return super().loss(xs, scale)
+        if self._loss_f == 'bce':
+            return self._bce_loss(xs, scale=scale)
+        raise Exception('Unrecognized loss function')
+
+    def _bce_loss(self, xs: dict, scale: float = 1e-3) -> tuple:
+        _, info = self(xs)
+
+        req_g_pred = info['req_g']
+        bs = req_g_pred.size(0)
+
+        ys_true = xs['bloom_ix'].to(config.TORCH_DTYPE).to(req_g_pred.device)
+
+        req_g_true = torch.cat(
+            [torch.arange(Dataset.SEASON_LENGTH).unsqueeze(0) for _ in range(bs)], dim=0
+        ).to(req_g_pred.device)
+        req_g_true = (req_g_true >= ys_true.view(-1, 1)).to(config.TORCH_DTYPE)
+
+        loss = F.binary_cross_entropy(req_g_pred, req_g_true)
+
+        return loss, {
+            'forward_pass': info,
+        }
 
     # @staticmethod
     # def _compute_ix(units_g_cs: torch.Tensor, req_g: torch.Tensor, beta: torch.Tensor, soft: bool = True,):
@@ -159,6 +181,15 @@ class BaseTorchAccumulationModel(BaseTorchModel):
     def unfreeze_operator_weights(self):
         for p in self.parameters():
             p.requires_grad = True
+
+    def set_mode_train(self):
+        self._soft_threshold = True
+        super().set_mode_train()
+
+    def set_mode_test(self):
+        if not self._soft_threshold_at_eval:
+            self._soft_threshold = False
+        super().set_mode_test()
 
     # def loss(self, xs: dict, scale: float = 1e-3) -> tuple:
     #     loss, info = super().loss(xs, scale)

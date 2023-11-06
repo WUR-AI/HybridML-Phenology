@@ -11,13 +11,29 @@ from datasets.dataset_torch import TorchDatasetWrapper
 from models.base import BaseModel
 from models.base_torch_accumulation import BaseTorchAccumulationModel
 from models.nn_chill_operator import NNChillModel
-from runs.fit_eval_util import configure_argparser_main, configure_argparser_dataset, get_configured_dataset
+from runs.args_util.args_dataset import configure_argparser_dataset, get_configured_dataset
+from runs.args_util.args_main import configure_argparser_main
+from runs.args_util.args_model import MODELS_KEYS_TO_CLS
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     configure_argparser_main(parser)
     configure_argparser_dataset(parser)
+
+    parser.add_argument('--model_cls',
+                        type=str,
+                        choices=list(MODELS_KEYS_TO_CLS.keys()),
+                        required=True,
+                        help='Specify the model class that is to be trained/evaluated',
+                        )
+
+    parser.add_argument('--model_name',
+                        type=str,
+                        help='Optionally specify a name for the model. If none is provided the model class will be '
+                             'used. The name is used for storing model weights and evaluation files',
+                        )
+
 
     args = parser.parse_args()
 
@@ -33,6 +49,7 @@ if __name__ == '__main__':
     model = model_cls.load(model_name)
 
     model._debug_mode = True
+    model.set_mode_test()
 
     # location = dataset.locations_test[0]
     location = 'Switzerland/Cevio-Cavergno'
@@ -93,6 +110,6 @@ if __name__ == '__main__':
     axs[4].legend()
     axs[5].legend()
 
-    plt.savefig('temp_unit_progression.png')
+    plt.savefig('temp_unit_progression_bce.png')
     plt.cla()
     plt.close()

@@ -12,7 +12,8 @@ from datasets.dataset import Dataset
 from datasets.dataset_torch import TorchDatasetWrapper
 from models.base import BaseModel
 from models.nn_chill_operator import NNChillModel
-from runs.fit_eval_util import get_configured_dataset, configure_argparser_main, configure_argparser_dataset
+from runs.args_util.args_dataset import configure_argparser_dataset, get_configured_dataset
+from runs.args_util.args_main import configure_argparser_main
 
 if __name__ == '__main__':
 

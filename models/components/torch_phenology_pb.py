@@ -60,7 +60,7 @@ class UtahChillModule(nn.Module):
         bin_5 *= -0.5
         bin_6 *= -1
 
-        return bin_0 + bin_1 + bin_2 + bin_3 + bin_4 + bin_5 + bin_6
+        return (bin_0 + bin_1 + bin_2 + bin_3 + bin_4 + bin_5 + bin_6) / ts.size(-1)
 
 
 class LogisticUtahChillModule(nn.Module):
@@ -95,7 +95,7 @@ class LogisticUtahChillModule(nn.Module):
 
     def forward(self, xs: dict) -> torch.Tensor:
         ts = _get_unnormalized_temperature(xs)
-        return F.relu((self._f1(ts) + self._f2(ts)).sum(dim=-1))
+        return F.relu((self._f1(ts) + self._f2(ts)).mean(dim=-1))
 
 
 class LogisticChillHoursModule(nn.Module):
@@ -130,7 +130,7 @@ class LogisticChillHoursModule(nn.Module):
 
     def forward(self, xs: dict) -> torch.Tensor:
         ts = _get_unnormalized_temperature(xs)
-        return F.relu((self._f1(ts) + self._f2(ts)).sum(dim=-1))
+        return F.relu((self._f1(ts) + self._f2(ts)).mean(dim=-1))
 
 
 def _get_unnormalized_temperature(xs: dict) -> torch.Tensor:

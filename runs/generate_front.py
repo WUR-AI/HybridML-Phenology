@@ -11,7 +11,8 @@ from evaluation.plots.maps import _get_countries_in_location_list, _filter_count
 from models.base import BaseModel
 from models.nn_chill_operator import NNChillModel
 from models.process_based.utah_chill import LocalUtahChillModel
-from runs.fit_eval_util import get_configured_dataset, configure_argparser_dataset, configure_argparser_main
+from runs.args_util.args_dataset import get_configured_dataset, configure_argparser_dataset
+from runs.args_util.args_main import configure_argparser_main
 
 
 # def _savefig_locations_front(locations_ixs_true: dict,

@@ -76,7 +76,7 @@ class DegreeDaysCNN(nn.Module):
         if self._num_out_channels == 1:
             units = units.squeeze(dim=1)  # Remove channel dimension
 
-        return units * 24
+        return units
 
     def _activation_f(self, x: torch.Tensor):
         if self._activation == 'sigmoid':
@@ -94,7 +94,7 @@ class DegreeDaysDNN(nn.Module):
 
     def __init__(self,
                  num_out_channels: int = 1,
-                 hidden_size: int = 32,
+                 hidden_size: int = 64,
                  num_daily_measurements: int = 24,
                  ):
         super().__init__()
@@ -117,6 +117,8 @@ class DegreeDaysDNN(nn.Module):
                                  kernel_size=(1, hidden_size),
                                  )
 
+        # self._dropout = nn.Dropout(p=0.1)
+
     def forward(self, xs: dict):
 
         xs = xs['temperature']
@@ -127,11 +129,13 @@ class DegreeDaysDNN(nn.Module):
         xs = xs.unsqueeze(1)  # shape: (batch_size, 1, season length, num daily temperature measurements)
 
         xs = self._conv_1(xs)  # shape: (batch_size, channels, season length, 1)
-        F.relu(xs, inplace=True)
+        xs = F.relu(xs)
         xs = torch.swapdims(xs, 1, 3)
 
+        # xs = self._dropout(xs)  # TODO -- remove
+
         xs = self._conv_2(xs)  # shape: (batch_size, channels, season length, 1)
-        F.relu(xs, inplace=True)
+        xs = F.relu(xs)
         xs = torch.swapdims(xs, 1, 3)
 
         units = self._conv_3(xs)  # shape: (batch_size, num_out_channels, season length, 1)
@@ -145,7 +149,7 @@ class DegreeDaysDNN(nn.Module):
         if self._num_out_channels == 1:
             units = units.squeeze(dim=1)  # Remove channel dimension
 
-        return units * 24
+        return units
 
 
 class DegreeDaysDNN_PP(nn.Module):
@@ -207,7 +211,7 @@ class DegreeDaysDNN_PP(nn.Module):
         if self._num_out_channels == 1:
             units = units.squeeze(dim=1)  # Remove channel dimension
 
-        return units * 24
+        return units
 
 
 class DegreeDaysDNN_Coord(nn.Module):
@@ -279,7 +283,7 @@ class DegreeDaysDNN_Coord(nn.Module):
         if self._num_out_channels == 1:
             units = units.squeeze(dim=1)  # Remove channel dimension
 
-        return units * 24
+        return units
 
 
 class DegreeDaysV(nn.Module):
@@ -347,4 +351,4 @@ class DegreeDaysV(nn.Module):
         if self._num_out_channels == 1:
             units = units.squeeze(dim=1)  # Remove channel dimension
 
-        return units * 24
+        return units
