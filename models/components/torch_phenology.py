@@ -156,7 +156,7 @@ class DegreeDaysDNN_PP(nn.Module):
 
     def __init__(self,
                  num_out_channels: int = 1,
-                 hidden_size: int = 32,
+                 hidden_size: int = 64,
                  num_daily_measurements: int = 24,
                  ):
         super().__init__()
