@@ -97,7 +97,8 @@ if __name__ == '__main__':
 
     # If training should be skipped -> load the model from disk
     if args.skip_fit:
-        model = model_cls.load(model_name)
+        model = model_cls.load(model_name)  # TODO -- move to util
+        # model._soft_threshold_at_eval = False
     # Otherwise, fit a new model
     else:
         model, _ = fit_model(args, dataset)

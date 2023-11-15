@@ -13,7 +13,7 @@ import config
 from datasets.dataset import Dataset
 from models.base_torch import BaseTorchModel
 from models.components.logistic import SoftThreshold
-from models.components.param_v2 import ParameterModel
+from models.components.param_v2 import ParameterModel, ParameterMapping
 # from models.components.param import ParamNet, LocalParams, ParameterModel
 from util.torch import batch_tensors
 
@@ -21,12 +21,14 @@ from util.torch import batch_tensors
 class BaseTorchAccumulationModel(BaseTorchModel):
 
     SLOPE = 50
+    # SLOPE = 1
     SCALE_CHILL = Dataset.SEASON_LENGTH
     SCALE_GROWTH = Dataset.SEASON_LENGTH
 
     LOSSES = [
         'mse',  # Mean Squared Error
         'bce',  # Binary Cross-Entropy
+        'nll',  # Negative Log-Likelihood
     ]
 
     def __init__(self,
@@ -50,6 +52,15 @@ class BaseTorchAccumulationModel(BaseTorchModel):
 
         # The model outputs intermediate variables during debug mode
         self._debug_mode = False  # TODO
+
+        # self._slope = torch.nn.Parameter(torch.tensor(1.))  # TODO
+        from data.bloom_doy import get_locations_japan, get_locations_switzerland  # TODO -- clean
+        # locations = get_locations_japan()
+        locations = get_locations_switzerland()
+        self._slope = ParameterMapping(
+            {loc: i for i, loc in enumerate(locations)},
+            init_val=1.0,
+        )
 
     @property
     def parameter_model(self) -> ParameterModel:
@@ -82,12 +93,19 @@ class BaseTorchAccumulationModel(BaseTorchModel):
                                                )
 
         units_g_masked = units_g * req_c
+        # units_g_masked = units_g * req_c + 1e-3
         units_g_cs = units_g_masked.cumsum(dim=-1)
 
         req_g = SoftThreshold.f_soft_threshold(units_g_cs,
-                                               BaseTorchAccumulationModel.SLOPE,
+                                               # BaseTorchAccumulationModel.SLOPE,
+                                               # 1 / torch.clamp(self._slope.to(units_g_cs.device), min=0.01),  # TODO
+                                               # 1 / (self._slope**2 + 0.01),
+                                               1 / (self._slope(xs) ** 2 + 0.01),
                                                th_g,
                                                )
+
+        # print((units_g_masked <= 0).sum())
+        # print(self._slope.item())
 
         """
             Compute the blooming ix 
@@ -104,6 +122,13 @@ class BaseTorchAccumulationModel(BaseTorchModel):
 
         # ix = (1 - req_g).sum(dim=-1)
         # ix = ix.clamp(min=0, max=Dataset.SEASON_LENGTH - 1)
+
+        # TODO -- remove
+        # dist = torch.distributions.LogNormal(tb_g, torch.ones_like(tb_g) * self._slope)
+        # dist = torch.distributions.Normal(tb_g, torch.ones_like(tb_g) * (self._slope**2 + 0.01))
+        # _ps = dist.log_prob(units_g_cs)
+        _sigma = self._slope(xs)**2 + 0.01
+        _ps = (1 / (_sigma * 2 * torch.pi) * torch.exp(-.5 * ((units_g_cs - tb_g) / _sigma) ** 2))
 
         optional_info = dict()
         if self._debug_mode:
@@ -126,14 +151,23 @@ class BaseTorchAccumulationModel(BaseTorchModel):
             'req_g': req_g,
             # 'units_g_masked': units_g_masked,
 
+            'tb_g': th_g,
+
+            'units_g_cs': units_g_cs,
+
+
+            '_ps': _ps,
+
             **optional_info,
         }
 
     def loss(self, xs: dict, scale: float = 1e-3) -> tuple:
         if self._loss_f == 'mse':
-            return super().loss(xs, scale)
+            return super().loss(xs, scale=scale)
         if self._loss_f == 'bce':
             return self._bce_loss(xs, scale=scale)
+        if self._loss_f == 'nll':
+            return self._nll_loss(xs, scale=scale)
         raise Exception('Unrecognized loss function')
 
     def _bce_loss(self, xs: dict, scale: float = 1e-3) -> tuple:
@@ -150,6 +184,77 @@ class BaseTorchAccumulationModel(BaseTorchModel):
         req_g_true = (req_g_true >= ys_true.view(-1, 1)).to(config.TORCH_DTYPE)
 
         loss = F.binary_cross_entropy(req_g_pred, req_g_true)
+
+        return loss, {
+            'forward_pass': info,
+        }
+
+    def _nll_loss(self, xs: dict, scale: float = 1) -> tuple:
+        _, info = self(xs)
+
+        req_g_pred = info['req_g']
+
+        ys_true = xs['bloom_ix']
+
+        bixs = torch.arange(ys_true.size(0)).to(ys_true.device)
+
+        # print('req g')
+        # print(req_g_pred)
+        # print('ys')
+        # print(ys_true)
+        # print('r[t]')
+        # print(req_g_pred[bixs, ys_true])
+        # print('r[t-1]')
+        # print(req_g_pred[bixs, ys_true - 1])
+
+        # print('hoi')
+        # print(req_g_pred.shape)  # bs x 274
+        # print(ys_true.shape)
+        # print(req_g_pred[:, ys_true].shape)
+        # print(req_g_pred[bixs, ys_true].shape)
+
+        # _ps_t = (1 - info['_ps']).cumprod(dim=-1)[bixs, ys_true]
+        # _ps_tmin1 = (1 - info['_ps']).cumprod(dim=-1)[bixs, ys_true - 1]
+        #
+        # ps = _ps_tmin1 - _ps_t
+
+        # ps = torch.index_select(req_g_pred, dim=1, index=ys_true) - torch.index_select(req_g_pred, dim=1, index=ys_true - 1)
+
+        # ps = req_g_pred[bixs, ys_true] - req_g_pred[bixs, ys_true - 1]
+
+        ps = (1 - info['_ps']).cumprod(dim=-1)[bixs, ys_true - 1] * info['_ps'][bixs, ys_true]
+
+        # ps = (1 - req_g_pred[ys_true - 1]) - (1 - req_g_pred[ys_true])
+
+        # print(((req_g_pred[bixs, ys_true - 1] > req_g_pred[bixs, ys_true]) * req_g_pred[bixs, ys_true]).sum())
+        # print(((req_g_pred[bixs, ys_true - 1] > req_g_pred[bixs, ys_true]) * req_g_pred[bixs, ys_true - 1]).sum())
+
+        # for _i, (_p1, _p2) in enumerate(zip(req_g_pred[bixs, ys_true], req_g_pred[bixs, ys_true - 1])):
+        #     if _p1.item() < _p2.item():
+        #         print('Culprit:')
+        #         print(_p1.item())
+        #         print(_p2.item())
+        #         print(ys_true[_i].item())
+        #         print(info['tb_g'][_i].item())
+        #         print()
+
+        # print(req_g_pred[bixs, ys_true - 1])
+        # print(req_g_pred[bixs, ys_true])
+
+        # print(ps.max())
+        # print(ps.min())
+        # print(torch.isnan(ps).sum())
+
+        # print('p')
+        # print(ps)
+
+        # loss = F.binary_cross_entropy(req_g_pred[bixs, ys_true + 5], torch.ones_like(req_g_pred[bixs, ys_true]))\
+        # + F.binary_cross_entropy(req_g_pred[bixs, ys_true - 1 - 5], torch.zeros_like(req_g_pred[bixs, ys_true - 1]))
+
+        # loss = -torch.log(ps + 1e-5).mean()
+        loss = F.binary_cross_entropy(ps, torch.ones_like(ps))
+        # loss = F.binary_cross_entropy(torch.clamp(ps, min=0, max=1), torch.ones_like(ps))
+        # z = input()
 
         return loss, {
             'forward_pass': info,

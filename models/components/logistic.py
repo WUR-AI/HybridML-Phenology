@@ -40,7 +40,6 @@ class GeneralizedLogistic(nn.Module):
                    ):
         out = o * F.sigmoid(a * (ts - b))
         return out
-        # return o / (1 + torch.exp(-a * (ts - b.view(-1, 1))))
 
 
 class SoftThreshold(GeneralizedLogistic):
