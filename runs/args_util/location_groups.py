@@ -33,11 +33,14 @@ LOCATION_GROUPS = {
     'japan_wo_okinawa': list(data.regions_japan.LOCATIONS_WO_OKINAWA.keys()),
 
     'japan_known_variety': list(data.regions_japan.LOCATION_VARIETY_JAPAN.keys()),  # Locations in Japan for which the variety is known
-    'japan_yedoenis': list(data.regions_japan.LOCATIONS_JAPAN_YEDOENIS.keys()),
+    'japan_yedoensis': list(data.regions_japan.LOCATIONS_JAPAN_YEDOENSIS.keys()),
     'japan_sargentii': list(data.regions_japan.LOCATIONS_JAPAN_SARGENTII.keys()),
 
-    'japan_yedoenis_sargentii': list(data.regions_japan.LOCATIONS_JAPAN_YEDOENIS.keys()) + list(data.regions_japan.LOCATIONS_JAPAN_SARGENTII.keys()),
+    'japan_yedoensis_sargentii': list(data.regions_japan.LOCATIONS_JAPAN_YEDOENSIS.keys()) + list(data.regions_japan.LOCATIONS_JAPAN_SARGENTII.keys()),
 
-    'japan_yedoenis_south_korea': list(data.regions_japan.LOCATIONS_JAPAN_YEDOENIS.keys()) + list(data.regions_japan.LOCATION_VARIETY_SOUTH_KOREA.keys()),
+    'japan_yedoenis_south_korea': list(data.regions_japan.LOCATIONS_JAPAN_YEDOENSIS.keys()) + list(data.regions_japan.LOCATION_VARIETY_SOUTH_KOREA.keys()),
+
+    'japan_tokyo': ['Japan/Tokyo'],
+    'japan_kyoto': ['Japan/Kyoto-1'],
 
 }

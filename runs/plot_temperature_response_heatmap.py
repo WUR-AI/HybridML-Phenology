@@ -143,7 +143,7 @@ if __name__ == '__main__':
 
     plt.imshow(grid, extent=extent)
     # plt.savefig('temp_response.png')
-    plt.savefig('temp_std.png')
+
 
 
 

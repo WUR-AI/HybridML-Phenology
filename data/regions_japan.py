@@ -295,7 +295,7 @@ LOCATION_VARIETY = {
 
 LOCATIONS_WO_OKINAWA = {k: v for k, v in LOCATIONS_REGIONS_JAPAN.items() if v != 10}
 
-LOCATIONS_JAPAN_YEDOENIS = {k: v for k, v in LOCATION_VARIETY_JAPAN.items() if v == 0}
+LOCATIONS_JAPAN_YEDOENSIS = {k: v for k, v in LOCATION_VARIETY_JAPAN.items() if v == 0}
 LOCATIONS_JAPAN_SARGENTII = {k: v for k, v in LOCATION_VARIETY_JAPAN.items() if v == 1}
 LOCATIONS_JAPAN_CAMPANULATA = {k: v for k, v in LOCATION_VARIETY_JAPAN.items() if v == 2}
 LOCATIONS_JAPAN_NIPPONICA = {k: v for k, v in LOCATION_VARIETY_JAPAN.items() if v == 3}

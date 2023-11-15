@@ -48,6 +48,16 @@ class TorchDatasetWrapper:
         samples = [self.cast_sample_to_tensors(sample, device=device) for sample in samples]
         return TorchDataset(samples)
 
+    def get_local_train_data(self, location: str, device=torch.device('cpu'),) -> TorchDataset:
+        samples = self._dataset.get_local_train_data(location)
+        samples = [self.cast_sample_to_tensors(sample, device=device) for sample in samples]
+        return TorchDataset(samples)
+
+    def get_local_test_data(self, location: str, device=torch.device('cpu'),) -> TorchDataset:
+        samples = self._dataset.get_local_test_data(location)
+        samples = [self.cast_sample_to_tensors(sample, device=device) for sample in samples]
+        return TorchDataset(samples)
+
     @staticmethod
     def cast_sample_to_tensors(sample: dict,
                                dtype=config.TORCH_DTYPE,
