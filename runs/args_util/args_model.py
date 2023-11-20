@@ -310,8 +310,8 @@ def fit_torch_model_using_args(model_cls: callable,
         model_kwargs['parameter_model_thg'] = _param_model_from_key(args, args.parameter_model_thg)
         model_kwargs['parameter_model_tbg'] = _param_model_from_key(args, args.parameter_model_tbg)
 
-        model_kwargs['parameter_model_slc'] = _param_model_from_key(args, args.parameter_model_tbg)
-        model_kwargs['parameter_model_slg'] = _param_model_from_key(args, args.parameter_model_tbg)
+        model_kwargs['parameter_model_slc'] = _param_model_from_key(args, args.parameter_model_tbg, init_value=1.0)
+        model_kwargs['parameter_model_slg'] = _param_model_from_key(args, args.parameter_model_tbg, init_value=1.0)
 
 
 
