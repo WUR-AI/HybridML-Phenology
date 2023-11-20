@@ -110,6 +110,6 @@ if __name__ == '__main__':
     axs[4].legend()
     axs[5].legend()
 
-    plt.savefig('temp_unit_progression_bce.png')
+    plt.savefig('temp_unit_progression_nll.png')
     plt.cla()
     plt.close()

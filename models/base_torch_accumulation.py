@@ -34,10 +34,18 @@ class BaseTorchAccumulationModel(BaseTorchModel):
         'nll',  # Negative Log-Likelihood
     ]
 
+    INFERENCE_MODES = [
+        'max_p',
+        'count_soft',
+        'count_hard',
+    ]
+
     def __init__(self,
                  param_model: ParameterModel,
                  soft_threshold_at_eval: bool = True,
                  loss_f: str = LOSSES[0],
+                 inference_mode_train: str = INFERENCE_MODES[0],
+                 inference_mode_test: str = INFERENCE_MODES[0],
                  ):
         assert loss_f in BaseTorchAccumulationModel.LOSSES
         super().__init__()
@@ -107,7 +115,28 @@ class BaseTorchAccumulationModel(BaseTorchModel):
                                                th_g,
                                                )
 
-        # print((units_g_masked <= 0).sum())
+        # ix_neg = (req_g - torch.roll(req_g, 1, dims=-1)) < 0
+        # eps = 1e-6
+        # req_g = req_g + (ix_neg * eps).cumsum(dim=-1)
+
+        req_g = req_g + torch.arange(274).view(1, -1).expand(req_g.size(0), -1).to(req_g.device) * 1e-6
+
+        # print((units_g_masked < 0).sum())
+        #
+        # bixs = torch.arange(req_g.size(0)).to(req_g.device)
+
+        # print(((req_g - torch.roll(req_g, 1, dims=-1))[bixs, 1:] < 0).sum())
+
+        # rtrt = 0
+        # for e in (req_g - torch.roll(req_g, 1, dims=-1))[bixs, 1:].view(-1):
+        #
+        #     if e < 0:
+        #         print(e.item())
+        #         rtrt += 1
+        #
+        #     if rtrt > 10:
+        #         exit()
+
         # print(self._slope.item())
 
         """
@@ -123,6 +152,8 @@ class BaseTorchAccumulationModel(BaseTorchModel):
         # If blooming never occurred -> set it to the end of the season
         ix = ix.clamp(min=0, max=Dataset.SEASON_LENGTH - 1)
 
+        ix = torch.argmax(req_g - torch.roll(req_g, 1, dims=-1), dim=-1)
+
         # ix = (1 - req_g).sum(dim=-1)
         # ix = ix.clamp(min=0, max=Dataset.SEASON_LENGTH - 1)
 
@@ -130,8 +161,9 @@ class BaseTorchAccumulationModel(BaseTorchModel):
         # dist = torch.distributions.LogNormal(tb_g, torch.ones_like(tb_g) * self._slope)
         # dist = torch.distributions.Normal(tb_g, torch.ones_like(tb_g) * (self._slope**2 + 0.01))
         # _ps = dist.log_prob(units_g_cs)
-        _sigma = self._slope(xs)**2 + 0.01
-        _ps = (1 / (_sigma * 2 * torch.pi) * torch.exp(-.5 * ((units_g_cs - tb_g) / _sigma) ** 2))
+        # _sigma = self._slope(xs)**2 + 0.01
+        # _sigma = 1
+        # _p_bloom = (1 / (_sigma * 2 * torch.pi) * torch.exp(-.5 * ((units_g_cs - tb_g) / _sigma) ** 2))
 
         optional_info = dict()
         if self._debug_mode:
@@ -154,12 +186,15 @@ class BaseTorchAccumulationModel(BaseTorchModel):
             'req_g': req_g,
             # 'units_g_masked': units_g_masked,
 
-            'tb_g': th_g,
+            # 'tb_g': th_g,
 
-            'units_g_cs': units_g_cs,
+            # 'units_g_cs': units_g_cs,
 
 
-            '_ps': _ps,
+            # '_p_bloom': _p_bloom,
+            # '_p_not_bloom': 1 - _p_bloom,  # probability of not blooming given that there has been no bloom yet
+            # '_survival': (1 - _p_bloom).cumprod(dim=-1),
+            # '_p_bloom_t': (1 - _p_bloom).cumprod(dim=-1) * torch.roll(_p_bloom, 1, dims=-1),  # TODO -- first element not valid
 
             **optional_info,
         }
@@ -223,9 +258,13 @@ class BaseTorchAccumulationModel(BaseTorchModel):
 
         # ps = torch.index_select(req_g_pred, dim=1, index=ys_true) - torch.index_select(req_g_pred, dim=1, index=ys_true - 1)
 
-        # ps = req_g_pred[bixs, ys_true] - req_g_pred[bixs, ys_true - 1]
+        ps = req_g_pred[bixs, ys_true] - req_g_pred[bixs, ys_true - 1]
 
-        ps = (1 - info['_ps']).cumprod(dim=-1)[bixs, ys_true - 1] * info['_ps'][bixs, ys_true]
+        # print(' '.join([f'{e.item():.2f}' for e in req_g_pred[0] - torch.roll(req_g_pred[0], 1, dims=-1)]))
+
+        # ps = (1 - info['_ps']).cumprod(dim=-1)[bixs, ys_true - 1] * info['_ps'][bixs, ys_true]
+
+        # ps = info['_p_bloom_t'][bixs, ys_true + 1]
 
         # ps = (1 - req_g_pred[ys_true - 1]) - (1 - req_g_pred[ys_true])
 
