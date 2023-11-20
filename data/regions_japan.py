@@ -148,6 +148,7 @@ VARIETIES = {
     1: 'ezoyamazakura',  # Prunus sargentii
     2: 'hikanzakura',  # Prunus campanulata Maxim
     3: 'chishimazakura',  # Prunus nipponica Matsum
+    4: 'jamasakura',  # Prunus jamasakura
 }
 
 # Source: https://www.data.jma.go.jp/sakura/data/sakura004_07.html
@@ -185,7 +186,7 @@ LOCATION_VARIETY_JAPAN = {
     'Japan/Hachinohe': 0,
     'Japan/Yamagata': 0,
     'Japan/Abashiri': 1,
-    'Japan/Kyoto-2': 0,
+    'Japan/Kyoto-2': 4,
     'Japan/Onahama': 0,
     'Japan/Matsuyama': 0,
     'Japan/Muroran-1': 0,
@@ -299,6 +300,7 @@ LOCATIONS_JAPAN_YEDOENSIS = {k: v for k, v in LOCATION_VARIETY_JAPAN.items() if 
 LOCATIONS_JAPAN_SARGENTII = {k: v for k, v in LOCATION_VARIETY_JAPAN.items() if v == 1}
 LOCATIONS_JAPAN_CAMPANULATA = {k: v for k, v in LOCATION_VARIETY_JAPAN.items() if v == 2}
 LOCATIONS_JAPAN_NIPPONICA = {k: v for k, v in LOCATION_VARIETY_JAPAN.items() if v == 3}
+LOCATIONS_JAPAN_JAMASAKURA = {k: v for k, v in LOCATION_VARIETY_JAPAN.items() if v == 4}
 
 LOCATIONS_HOKKAIDO = {k: v for k, v in LOCATIONS_REGIONS_JAPAN.items() if v == 0}
 LOCATIONS_TOHOKU = {k: v for k, v in LOCATIONS_REGIONS_JAPAN.items() if v == 1}
@@ -322,6 +324,7 @@ if __name__ == '__main__':
         1: 'blue',
         2: 'green',
         3: 'purple',
+        4: 'orange',
     }
     _colors = [_cmap[LOCATION_VARIETY_JAPAN[_loc]] for _loc in _locations]
 

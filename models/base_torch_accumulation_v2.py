@@ -27,9 +27,9 @@ class BaseTorchAccumulationModel(BaseTorchModel):
     SCALE_GROWTH = Dataset.SEASON_LENGTH
 
     LOSSES = [
+        'nll',  # Negative Log-Likelihood
         'mse',  # Mean Squared Error
         'bce',  # Binary Cross-Entropy
-        'nll',  # Negative Log-Likelihood
     ]
 
     INFERENCE_MODES = [

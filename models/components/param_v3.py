@@ -9,21 +9,27 @@ import torch.nn.functional as F
 
 class ParameterModel(nn.Module):
 
-    def get_parameters(self, xs: dict):
+    def get_parameters(self, xs: dict) -> torch.Tensor:
         raise NotImplementedError
 
 
 class FixedParameterModel(ParameterModel):
+    """
+    Map the same constant value to each location
+    """
 
     def __init__(self, c: float):
         super().__init__()
-        self._c = c
+        self._c = nn.Parameter(torch.Tensor(c), requires_grad=False)
 
-    def get_parameters(self, xs: dict):
-        return torch.ones_like(xs['bloom_ix']).unsqueeze(-1) * self._c
+    def get_parameters(self, xs: dict) -> torch.Tensor:
+        return torch.ones(len(xs['location'])).unsqueeze(-1).to(self._c.device) * self._c
 
 
 class GroupedParameterMapping(ParameterModel):
+    """
+    Map location groups to a value
+    """
 
     def __init__(self,
                  location_groups: dict,
