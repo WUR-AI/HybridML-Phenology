@@ -7,8 +7,6 @@ from datasets.dataset import Dataset
 from models.base_torch import DummyTorchModel, BaseTorchModel
 from models.base_torch_accumulation import BaseTorchAccumulationModel
 from models.components.param_v3 import LocalParameterMapping, GlobalParameterMapping, GroupedParameterMapping
-# from models.components.param_v2 import LocalAccumulationParameterMapping, GlobalAccumulationParameterMapping, \
-#     AccumulationParameterMapping
 from models.diff_utah import DiffUtahModel
 from models.mean import MeanModel
 from models.nn_chill_operator import NNChillModel
@@ -107,12 +105,6 @@ def configure_argparser_model(model_cls: callable, parser: argparse.ArgumentPars
                                 default=BaseTorchAccumulationModel.INFERENCE_MODES[0],
                                 help='Specify how to compute the blooming index',
                                 )
-
-            # parser.add_argument('--hard_threshold_at_eval',
-            #                     action='store_true',
-            #                     help='If set, a hard threshold will be used to obtain the blooming dates during '
-            #                          'evaluation',
-            #                     )
             configure_argument_parser_parameter_models(parser)
 
         return parser
@@ -312,20 +304,6 @@ def fit_torch_model_using_args(model_cls: callable,
 
         model_kwargs['parameter_model_slc'] = _param_model_from_key(args, args.parameter_model_tbg, init_value=1.0)
         model_kwargs['parameter_model_slg'] = _param_model_from_key(args, args.parameter_model_tbg, init_value=1.0)
-
-
-
-        # if args.parameter_model == 'local':
-        #     model_kwargs['param_model'] = LocalAccumulationParameterMapping(locations)
-        # elif args.parameter_model == 'global':
-        #     model_kwargs['param_model'] = GlobalAccumulationParameterMapping(locations)
-        # elif args.parameter_model == 'japan_cultivars':
-        #     model_kwargs['param_model'] = AccumulationParameterMapping(data.regions_japan.LOCATION_VARIETY_JAPAN)
-        # elif args.parameter_model == 'known_cultivars':
-        #     model_kwargs['param_model'] = AccumulationParameterMapping(data.regions_japan.LOCATION_VARIETY)
-        #
-        # else:
-        #     raise ConfigException(f'Cannot configure parameter model "{args.parameter_model}"')
 
     kwargs = {
         'num_epochs': args.num_epochs,
