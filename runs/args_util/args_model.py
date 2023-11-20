@@ -6,8 +6,9 @@ import data.regions_japan
 from datasets.dataset import Dataset
 from models.base_torch import DummyTorchModel, BaseTorchModel
 from models.base_torch_accumulation import BaseTorchAccumulationModel
-from models.components.param_v2 import LocalAccumulationParameterMapping, GlobalAccumulationParameterMapping, \
-    AccumulationParameterMapping
+from models.components.param_v3 import LocalParameterMapping, GlobalParameterMapping, GroupedParameterMapping
+# from models.components.param_v2 import LocalAccumulationParameterMapping, GlobalAccumulationParameterMapping, \
+#     AccumulationParameterMapping
 from models.diff_utah import DiffUtahModel
 from models.mean import MeanModel
 from models.nn_chill_operator import NNChillModel
@@ -46,6 +47,7 @@ MODELS = [
     ChillHoursModel,
     UtahChillModel,
     ChillDaysModel,
+
     # Process Based models that use a parameter set per location
     LocalChillHoursModel,
     LocalUtahChillModel,
@@ -56,7 +58,6 @@ MODELS = [
 
     # Learned chill operator
     NNChillModel,
-
 
 ]
 
@@ -100,12 +101,19 @@ def configure_argparser_model(model_cls: callable, parser: argparse.ArgumentPars
                                 default=BaseTorchAccumulationModel.LOSSES[0],
                                 help='Loss function that is to be used for training the model',
                                 )
-            parser.add_argument('--hard_threshold_at_eval',
-                                action='store_true',
-                                help='If set, a hard threshold will be used to obtain the blooming dates during '
-                                     'evaluation',
+            parser.add_argument('--inference_mode_test',
+                                type=str,
+                                choices=BaseTorchAccumulationModel.INFERENCE_MODES,
+                                default=BaseTorchAccumulationModel.INFERENCE_MODES[0],
+                                help='Specify how to compute the blooming index',
                                 )
-            configure_argument_parser_parameter_model(parser)
+
+            # parser.add_argument('--hard_threshold_at_eval',
+            #                     action='store_true',
+            #                     help='If set, a hard threshold will be used to obtain the blooming dates during '
+            #                          'evaluation',
+            #                     )
+            configure_argument_parser_parameter_models(parser)
 
         return parser
 
@@ -174,6 +182,8 @@ def configure_argparser_fit_torch(parser: argparse.ArgumentParser) -> argparse.A
 
 # Options for configuring a parameter model
 PARAMETER_MODELS_KEYS = [
+    # Constant value that is not learned
+    'constant',
     # Map parameter sets to each location individually
     'local',
     # Use one set of parameters
@@ -185,7 +195,7 @@ PARAMETER_MODELS_KEYS = [
 ]
 
 
-def configure_argument_parser_parameter_model(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
+def configure_argument_parser_parameter_models(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     """
     Configure the provided argument parser to parse arguments that relate to configuring a model to provide
     parameters based on the location
@@ -193,12 +203,49 @@ def configure_argument_parser_parameter_model(parser: argparse.ArgumentParser) -
     :param parser: the parser that should be configured
     :return: a reference to the provided parser, now configured
     """
-    parser.add_argument('--parameter_model',
+    # parser.add_argument('--parameter_model',
+    #                     type=str,
+    #                     default='local',
+    #                     choices=PARAMETER_MODELS_KEYS,
+    #                     help='Model that should be used to map locations to parameter values. If none is specified, '
+    #                          'each location is mapped to a tuple of parameters.',
+    #                     )
+
+    parser.add_argument('--parameter_model_thc',
                         type=str,
                         default='local',
+                        choices=PARAMETER_MODELS_KEYS[1:],
+                        help='Model that is used to map locations to "chill threshold" parameter values. If none is '
+                             'specified, each location is mapped to one parameter',
+                        )
+    parser.add_argument('--parameter_model_thg',
+                        type=str,
+                        default='local',
+                        choices=PARAMETER_MODELS_KEYS[1:],
+                        help='Model that is used to map locations to "growth threshold" parameter values. If none is '
+                             'specified, each location is mapped to one parameter',
+                        )
+    parser.add_argument('--parameter_model_tbg',
+                        type=str,
+                        default='local',
+                        choices=PARAMETER_MODELS_KEYS[1:],
+                        help='Model that is used to map locations to "base temperature" parameter values. If none is '
+                             'specified, each location is mapped to one parameter',
+                        )
+
+    parser.add_argument('--parameter_model_slc',
+                        type=str,
+                        default='constant',
                         choices=PARAMETER_MODELS_KEYS,
-                        help='Model that should be used to map locations to parameter values. If none is specified, '
-                             'each location is mapped to a tuple of parameters.',
+                        help='Model that is used to map locations to parameter values controlling the slope of the '
+                             'soft chill threshold. If none is specified, a constant is used'
+                        )
+    parser.add_argument('--parameter_model_slg',
+                        type=str,
+                        default='local',
+                        choices=PARAMETER_MODELS_KEYS[1:],
+                        help='Model that is used to map locations to parameter values controlling the slope of the '
+                             'soft chill threshold. If none is specified, each location is mapped to one parameter'
                         )
 
     return parser
@@ -257,19 +304,28 @@ def fit_torch_model_using_args(model_cls: callable,
         locations = LOCATION_GROUPS[args.locations]
 
         model_kwargs['loss_f'] = args.loss_f
-        model_kwargs['soft_threshold_at_eval'] = not args.hard_threshold_at_eval
+        model_kwargs['inference_mode_test'] = args.inference_mode_test
 
-        if args.parameter_model == 'local':
-            model_kwargs['param_model'] = LocalAccumulationParameterMapping(locations)
-        elif args.parameter_model == 'global':
-            model_kwargs['param_model'] = GlobalAccumulationParameterMapping(locations)
-        elif args.parameter_model == 'japan_cultivars':
-            model_kwargs['param_model'] = AccumulationParameterMapping(data.regions_japan.LOCATION_VARIETY_JAPAN)
-        elif args.parameter_model == 'known_cultivars':
-            model_kwargs['param_model'] = AccumulationParameterMapping(data.regions_japan.LOCATION_VARIETY)  # TODO
+        model_kwargs['parameter_model_thc'] = _param_model_from_key(args, args.parameter_model_thc)
+        model_kwargs['parameter_model_thg'] = _param_model_from_key(args, args.parameter_model_thg)
+        model_kwargs['parameter_model_tbg'] = _param_model_from_key(args, args.parameter_model_tbg)
 
-        else:
-            raise ConfigException(f'Cannot configure parameter model "{args.parameter_model}"')
+        model_kwargs['parameter_model_slc'] = _param_model_from_key(args, args.parameter_model_tbg)
+        model_kwargs['parameter_model_slg'] = _param_model_from_key(args, args.parameter_model_tbg)
+
+
+
+        # if args.parameter_model == 'local':
+        #     model_kwargs['param_model'] = LocalAccumulationParameterMapping(locations)
+        # elif args.parameter_model == 'global':
+        #     model_kwargs['param_model'] = GlobalAccumulationParameterMapping(locations)
+        # elif args.parameter_model == 'japan_cultivars':
+        #     model_kwargs['param_model'] = AccumulationParameterMapping(data.regions_japan.LOCATION_VARIETY_JAPAN)
+        # elif args.parameter_model == 'known_cultivars':
+        #     model_kwargs['param_model'] = AccumulationParameterMapping(data.regions_japan.LOCATION_VARIETY)
+        #
+        # else:
+        #     raise ConfigException(f'Cannot configure parameter model "{args.parameter_model}"')
 
     kwargs = {
         'num_epochs': args.num_epochs,
@@ -290,3 +346,18 @@ def fit_torch_model_using_args(model_cls: callable,
                          )
 
 
+def _param_model_from_key(args: argparse.Namespace, key: str, init_value: float = 0,):
+    locations = LOCATION_GROUPS[args.locations]
+
+    if key == 'constant':
+        return None
+    if key == 'local':
+        return LocalParameterMapping(locations, init_val=init_value,)
+    if key == 'global':
+        return GlobalParameterMapping(locations, init_val=init_value,)
+    if key == 'japan_cultivars':
+        return GroupedParameterMapping(data.regions_japan.LOCATION_VARIETY_JAPAN, init_val=init_value,)
+    if key == 'known_cultivars':
+        return GroupedParameterMapping(data.regions_japan.LOCATION_VARIETY, init_val=init_value,)
+
+    raise ConfigException(f'Cannot configure parameter model "{args.parameter_model}"')

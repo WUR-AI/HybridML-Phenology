@@ -107,7 +107,9 @@ class BaseTorchAccumulationModel(BaseTorchModel):
                                                th_g,
                                                )
 
-        req_g = req_g + torch.arange(274).view(1, -1).expand(req_g.size(0), -1).to(req_g.device) * 1e-6
+        season_length = req_g.size(1)
+        epsilon = 1e-6
+        req_g = req_g + torch.arange(season_length).view(1, -1).expand(req_g.size(0), -1).to(req_g.device) * epsilon
 
         """
             Compute the blooming ix 

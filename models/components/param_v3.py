@@ -25,6 +25,10 @@ class FixedParameterModel(ParameterModel):
     def get_parameters(self, xs: dict) -> torch.Tensor:
         return torch.ones(len(xs['location'])).unsqueeze(-1).to(self._c.device) * self._c
 
+    @property
+    def value(self) -> float:  # TODO -- setter
+        return self._c.item()
+
 
 class GroupedParameterMapping(ParameterModel):
     """
