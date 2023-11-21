@@ -204,15 +204,15 @@ def evaluate(model: BaseModel,
 
         table_regional_train, column_names = _create_table(
             metrics,  # Replace region id with region names
-            {regions_japan.REGIONS_JAPAN[region_id]: vals for region_id, vals in doys_true_per_region_train.items()},
-            {regions_japan.REGIONS_JAPAN[region_id]: vals for region_id, vals in doys_pred_per_region_train.items()},
+            {regions.REGIONS_JAPAN[region_id]: vals for region_id, vals in doys_true_per_region_train.items()},
+            {regions.REGIONS_JAPAN[region_id]: vals for region_id, vals in doys_pred_per_region_train.items()},
             name='regional_japan_train',
         )
 
         table_regional_test, column_names = _create_table(
             metrics,  # Replace region id with region names
-            {regions_japan.REGIONS_JAPAN[region_id]: vals for region_id, vals in doys_true_per_region_test.items()},
-            {regions_japan.REGIONS_JAPAN[region_id]: vals for region_id, vals in doys_pred_per_region_test.items()},
+            {regions.REGIONS_JAPAN[region_id]: vals for region_id, vals in doys_true_per_region_test.items()},
+            {regions.REGIONS_JAPAN[region_id]: vals for region_id, vals in doys_pred_per_region_test.items()},
             name='regional_japan_test',
         )
 
@@ -221,14 +221,14 @@ def evaluate(model: BaseModel,
 
         df_regional_train = _create_dataframe(
             metrics,  # Replace region id with region names
-            {regions_japan.REGIONS_JAPAN[region_id]: vals for region_id, vals in doys_true_per_region_train.items()},
-            {regions_japan.REGIONS_JAPAN[region_id]: vals for region_id, vals in doys_pred_per_region_train.items()},
+            {regions.REGIONS_JAPAN[region_id]: vals for region_id, vals in doys_true_per_region_train.items()},
+            {regions.REGIONS_JAPAN[region_id]: vals for region_id, vals in doys_pred_per_region_train.items()},
         )
 
         df_regional_test = _create_dataframe(
             metrics,  # Replace region id with region names
-            {regions_japan.REGIONS_JAPAN[region_id]: vals for region_id, vals in doys_true_per_region_test.items()},
-            {regions_japan.REGIONS_JAPAN[region_id]: vals for region_id, vals in doys_pred_per_region_test.items()},
+            {regions.REGIONS_JAPAN[region_id]: vals for region_id, vals in doys_true_per_region_test.items()},
+            {regions.REGIONS_JAPAN[region_id]: vals for region_id, vals in doys_pred_per_region_test.items()},
         )
 
         _save_df(df_regional_train,

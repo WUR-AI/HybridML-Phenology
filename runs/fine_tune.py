@@ -3,7 +3,7 @@ import argparse
 import torch
 
 from models.base_torch_accumulation import BaseTorchAccumulationModel
-from models.components.param_v2 import AccumulationParameterMapping
+from models.components.param_v3 import GroupedParameterMapping
 from runs.args_util.args_dataset import get_configured_dataset, configure_argparser_dataset
 from runs.args_util.args_evaluation import configure_argparser_evaluation, evaluate_model_using_args
 from runs.args_util.args_main import configure_argparser_main
@@ -81,7 +81,7 @@ if __name__ == '__main__':
 
     assert isinstance(model, BaseTorchAccumulationModel)
 
-    if isinstance(model.parameter_model, AccumulationParameterMapping):
+    if isinstance(model.parameter_model, GroupedParameterMapping):  # TODO -- all models
         model.parameter_model.ungroup()
 
     model.freeze_operator_weights()
