@@ -5,7 +5,7 @@
     https://www.data.jma.go.jp/stats/data/en/index.html
 
 """
-from data.bloom_doy import get_locations_south_korea
+from data.bloom_doy import get_locations_south_korea, get_locations_switzerland
 
 REGIONS_JAPAN = {
     0: 'Hokkaido',
@@ -144,11 +144,12 @@ LOCATIONS_REGIONS_JAPAN = {
 
 
 VARIETIES = {
-    0: 'someiyoshino',  # Prunus Yedoenis
+    0: 'someiyoshino',  # Prunus Yedoensis
     1: 'ezoyamazakura',  # Prunus sargentii
     2: 'hikanzakura',  # Prunus campanulata Maxim
     3: 'chishimazakura',  # Prunus nipponica Matsum
     4: 'jamasakura',  # Prunus jamasakura
+    5: 'avium',  # Prunus Avium
 }
 
 # Source: https://www.data.jma.go.jp/sakura/data/sakura004_07.html
@@ -267,12 +268,18 @@ LOCATION_VARIETY_JAPAN = {
     # 'Japan/Kutchan': ,  # Kutchan observed Ezoyamazakura until 1994 and Someiyoshino from 1995 to 2006 .
 }
 
+# Based on https://www.meteoswiss.admin.ch/weather/measurement-systems/land-based-stations/swiss-phenology-network.html
+LOCATION_VARIETY_SWITZERLAND = {
+    loc: 5 for loc in get_locations_switzerland()
+}
+
 LOCATION_VARIETY_SOUTH_KOREA = {  # TODO -- verify
     loc: 0 for loc in get_locations_south_korea()
 }
 
 LOCATION_VARIETY = {
-    **LOCATIONS_REGIONS_JAPAN,
+    **LOCATION_VARIETY_JAPAN,
+    **LOCATION_VARIETY_SWITZERLAND,
     **LOCATION_VARIETY_SOUTH_KOREA,
 }
 
@@ -325,6 +332,7 @@ if __name__ == '__main__':
         2: 'green',
         3: 'purple',
         4: 'orange',
+        5: 'cyan',
     }
     _colors = [_cmap[LOCATION_VARIETY_JAPAN[_loc]] for _loc in _locations]
 

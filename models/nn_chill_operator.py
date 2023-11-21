@@ -37,7 +37,7 @@ class NNChillModel(BaseTorchAccumulationModel):
         # self._chill_model = DegreeDaysDNN_PP()
         # self._chill_model = DegreeDaysDNN_Coord()
 
-    def f_units_chill_growth(self, xs: dict, tb: torch.Tensor):
+    def f_units(self, xs: dict, tb: torch.Tensor):
         cus = self._chill_model(xs)
         gus = TorchGDD.f_gdd(xs, tb)
         return cus, gus

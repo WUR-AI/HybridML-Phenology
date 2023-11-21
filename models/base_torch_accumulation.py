@@ -107,9 +107,11 @@ class BaseTorchAccumulationModel(BaseTorchModel):
                                                th_g,
                                                )
 
-        season_length = req_g.size(1)
-        epsilon = 1e-6
-        req_g = req_g + torch.arange(season_length).view(1, -1).expand(req_g.size(0), -1).to(req_g.device) * epsilon
+        # req_g = torch.distributions.Normal(th_g, 1 / (sl_g ** 2 + self._clip_slope)).cdf(units_g_cs)
+
+        # season_length = req_g.size(1)
+        # epsilon = 1e-6
+        # req_g = req_g + torch.arange(season_length).view(1, -1).expand(req_g.size(0), -1).to(req_g.device) * epsilon
 
         """
             Compute the blooming ix 
@@ -193,7 +195,8 @@ class BaseTorchAccumulationModel(BaseTorchModel):
 
         bixs = torch.arange(ys_true.size(0)).to(ys_true.device)
 
-        ps = req_g_pred[bixs, ys_true] - req_g_pred[bixs, ys_true - 1]
+        epsilon = 1e-6
+        ps = req_g_pred[bixs, ys_true] - req_g_pred[bixs, ys_true - 1] + epsilon
 
         loss = F.binary_cross_entropy(ps, torch.ones_like(ps))
 

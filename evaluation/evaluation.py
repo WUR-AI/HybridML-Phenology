@@ -10,7 +10,7 @@ from tqdm import tqdm
 import openpyxl
 
 import config
-from data import regions_japan
+from data import regions
 
 from datasets.dataset import Dataset, split_location_token
 from evaluation.plots.coordinates import savefig_mae_over_coords

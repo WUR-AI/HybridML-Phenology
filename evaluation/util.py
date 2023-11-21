@@ -1,5 +1,5 @@
 from collections import defaultdict
-from data.regions_japan import *
+from data.regions import *
 from datasets.dataset import split_location_token
 
 

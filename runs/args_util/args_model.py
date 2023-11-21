@@ -2,7 +2,7 @@ import argparse
 
 import torch
 
-import data.regions_japan
+import data.regions
 from datasets.dataset import Dataset
 from models.base_torch import DummyTorchModel, BaseTorchModel
 from models.base_torch_accumulation import BaseTorchAccumulationModel
@@ -91,13 +91,18 @@ def configure_argparser_model(model_cls: callable, parser: argparse.ArgumentPars
 
     if issubclass(model_cls, BaseTorchModel):  # TODO -- more explicit?
         configure_argparser_fit_torch(parser)
-
         if issubclass(model_cls, BaseTorchAccumulationModel):
             parser.add_argument('--loss_f',
                                 type=str,
                                 choices=BaseTorchAccumulationModel.LOSSES,
                                 default=BaseTorchAccumulationModel.LOSSES[0],
                                 help='Loss function that is to be used for training the model',
+                                )
+            parser.add_argument('--inference_mode_train',
+                                type=str,
+                                choices=BaseTorchAccumulationModel.INFERENCE_MODES,
+                                default=BaseTorchAccumulationModel.INFERENCE_MODES[0],
+                                help='Specify how to compute the blooming index',
                                 )
             parser.add_argument('--inference_mode_test',
                                 type=str,
@@ -293,9 +298,9 @@ def fit_torch_model_using_args(model_cls: callable,
 
     model_kwargs = dict()
     if issubclass(model_cls, BaseTorchAccumulationModel):
-        locations = LOCATION_GROUPS[args.locations]
 
         model_kwargs['loss_f'] = args.loss_f
+        model_kwargs['inference_mode_train'] = args.inference_mode_train
         model_kwargs['inference_mode_test'] = args.inference_mode_test
 
         model_kwargs['parameter_model_thc'] = _param_model_from_key(args, args.parameter_model_thc)
@@ -334,8 +339,8 @@ def _param_model_from_key(args: argparse.Namespace, key: str, init_value: float 
     if key == 'global':
         return GlobalParameterMapping(locations, init_val=init_value,)
     if key == 'japan_cultivars':
-        return GroupedParameterMapping(data.regions_japan.LOCATION_VARIETY_JAPAN, init_val=init_value,)
+        return GroupedParameterMapping(data.regions.LOCATION_VARIETY_JAPAN, init_val=init_value,)
     if key == 'known_cultivars':
-        return GroupedParameterMapping(data.regions_japan.LOCATION_VARIETY, init_val=init_value,)
+        return GroupedParameterMapping(data.regions.LOCATION_VARIETY, init_val=init_value,)
 
     raise ConfigException(f'Cannot configure parameter model "{args.parameter_model}"')

@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from data.regions_japan import LOCATION_VARIETY_JAPAN, VARIETIES
+from data.regions import LOCATION_VARIETY_JAPAN, VARIETIES
 from util.torch import batch_tensors
 
 from util.photoperiod import photoperiod
