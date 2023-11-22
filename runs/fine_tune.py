@@ -4,6 +4,7 @@ import torch
 
 from models.base_torch_accumulation import BaseTorchAccumulationModel
 from models.components.param_v3 import GroupedParameterMapping
+from models.nn_chill_operator import NNChillModel
 from runs.args_util.args_dataset import get_configured_dataset, configure_argparser_dataset
 from runs.args_util.args_evaluation import configure_argparser_evaluation, evaluate_model_using_args
 from runs.args_util.args_main import configure_argparser_main
@@ -79,10 +80,18 @@ if __name__ == '__main__':
 
     model = args.model_cls.load(model_name)
 
-    assert isinstance(model, BaseTorchAccumulationModel)
+    assert isinstance(model, NNChillModel)
 
-    if isinstance(model.parameter_model, GroupedParameterMapping):  # TODO -- all models
-        model.parameter_model.ungroup()
+    if isinstance(model._pm_thc, GroupedParameterMapping):
+        model._pm_thc = model._pm_thc.as_ungrouped()
+    if isinstance(model._pm_thg, GroupedParameterMapping):
+        model._pm_thg = model._pm_thg.as_ungrouped()
+    if isinstance(model._pm_tbg, GroupedParameterMapping):
+        model._pm_tbg = model._pm_tbg.as_ungrouped()
+    if isinstance(model._pm_slc, GroupedParameterMapping):
+        model._pm_slc = model._pm_slc.as_ungrouped()
+    if isinstance(model._pm_slg, GroupedParameterMapping):
+        model._pm_slg = model._pm_slg.as_ungrouped()
 
     model.freeze_operator_weights()
 

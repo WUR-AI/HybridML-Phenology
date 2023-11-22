@@ -22,6 +22,12 @@ from models.base import BaseModel
 
 # TODO -- model specific evaluation
 
+CSV_SEPARATOR = ';'
+CSV_FLOAT_FMT = '%.5f'
+CSV_FLOAT_SEPARATOR = ','  # Set to ',' for compatibility with spreadsheet software
+
+SAVE_TABLE_AS_XLSX = False
+
 
 def evaluate(model: BaseModel,
              dataset: Dataset,
@@ -405,8 +411,15 @@ def _save_df(df: pd.DataFrame,
              path: str,
              name: str,
              ):
-    df.to_csv(os.path.join(path, f'{name}.csv'))
-    df.to_excel(os.path.join(path, f'{name}.xlsx'))
+
+    df.to_csv(os.path.join(path, f'{name}.csv'),
+              sep=CSV_SEPARATOR,
+              float_format=CSV_FLOAT_FMT,
+              decimal=CSV_FLOAT_SEPARATOR,
+              )
+
+    if SAVE_TABLE_AS_XLSX:
+        df.to_excel(os.path.join(path, f'{name}.xlsx'))
 
 
 def _create_table(metrics: dict,

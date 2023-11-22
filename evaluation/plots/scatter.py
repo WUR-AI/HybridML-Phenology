@@ -40,11 +40,11 @@ def savefig_scatter_doys(doys_true: list,
     ax.set_xlabel('DOY pred')
     ax.set_ylabel('DOY true')
 
-    plt.legend()
+    plt.legend(fontsize=20)
 
-    plt.title(title)
+    # plt.title(title)
 
-    plt.savefig(os.path.join(path, fn))
+    plt.savefig(os.path.join(path, fn), bbox_inches='tight')
 
     plt.cla()
     plt.close()
@@ -104,7 +104,7 @@ def savefig_scatter_doys_global(doys_true: list,
 
     plt.title(f'Global DOY predictions (r2 {r2:.2f}, rmse {rmse:.2f}, mae {mae:.2f}, n={len(doys_true)})')
 
-    plt.savefig(os.path.join(path_global, fn_global))
+    plt.savefig(os.path.join(path_global, fn_global), bbox_inches='tight')
 
     plt.cla()
     plt.close()

@@ -42,6 +42,14 @@ class NNChillModel(BaseTorchAccumulationModel):
         gus = TorchGDD.f_gdd(xs, tb)
         return cus, gus
 
+    def freeze_operator_weights(self):
+        for p in self._chill_model.parameters():
+            p.requires_grad = False
+
+    def unfreeze_operator_weights(self):
+        for p in self._chill_model.parameters():
+            p.requires_grad = True
+
 
 # class NNGrowthModel(BaseTorchAccumulationModel):
 #

@@ -99,20 +99,12 @@ class BaseTorchAccumulationModel(BaseTorchModel):
                                                )
 
         units_g_masked = units_g * req_c
-        # units_g_masked = units_g * req_c + 1e-3
         units_g_cs = units_g_masked.cumsum(dim=-1)
 
         req_g = SoftThreshold.f_soft_threshold(units_g_cs,
                                                1 / (sl_g ** 2 + self._clip_slope),
                                                th_g,
                                                )
-
-        # req_g = torch.distributions.Normal(th_g, 1 / (sl_g ** 2 + self._clip_slope)).cdf(units_g_cs)
-
-        # season_length = req_g.size(1)
-        # epsilon = 1e-6
-        # req_g = req_g + torch.arange(season_length).view(1, -1).expand(req_g.size(0), -1).to(req_g.device) * epsilon
-
         """
             Compute the blooming ix 
         """
@@ -207,16 +199,6 @@ class BaseTorchAccumulationModel(BaseTorchModel):
     @classmethod
     def _path_params_dir(cls) -> str:
         return os.path.join(config.PATH_PARAMS_DIR, cls.__name__)
-
-    def freeze_operator_weights(self):
-        for p in self.parameters():
-            p.requires_grad = False
-        for p in self._param_model.parameters():
-            p.requires_grad = True
-
-    def unfreeze_operator_weights(self):
-        for p in self.parameters():
-            p.requires_grad = True
 
     def set_mode_train(self):
         self._inf_mode = self._inf_mode_train
