@@ -111,6 +111,14 @@ class GroupedParameterMapping(ParameterModel):
             init_val_group={ix: loc_vals[loc] for loc, ix in loc_ixs.items()}
         )
 
+    def freeze(self):
+        for p in self.parameters():
+            p.requires_grad = False
+
+    def unfreeze(self):
+        for p in self.parameters():
+            p.requires_grad = True
+
 
 class LocalParameterMapping(GroupedParameterMapping):
 
