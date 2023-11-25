@@ -32,15 +32,18 @@ def savefig_scatter_doys(doys_true: list,
     ax.scatter(doys_pred,
                doys_true,
                c=colors,
-               label=f'r2 {r2:.2f}, rmse {rmse:.2f}, mae {mae:.2f}, n={len(doys_true)})',
+               label=f'r2 {r2:.2f}, MAE {mae:.2f}, N={len(doys_true)})',
+               # label=f'r2 {r2:.2f}, rmse {rmse:.2f}, mae {mae:.2f}, n={len(doys_true)})',
                s=3,
                alpha=0.3,
                )
 
-    ax.set_xlabel('DOY pred')
-    ax.set_ylabel('DOY true')
+    fontsize = 16
 
-    plt.legend(fontsize=20)
+    ax.set_xlabel('DOY pred', fontsize=fontsize)
+    ax.set_ylabel('DOY true', fontsize=fontsize)
+
+    plt.legend(fontsize=fontsize)
 
     # plt.title(title)
 
@@ -92,7 +95,8 @@ def savefig_scatter_doys_global(doys_true: list,
 
         ax.scatter(doys_pred_nat[country],
                    doys_true_nat[country],
-                   label=f'{country} (r2 {r2_nat:.2f}, rmse {rmse_nat:.2f}, mae {mae_nat:.2f}, n={len(doys_true_nat[country])})',
+                   # label=f'{country} (r2 {r2_nat:.2f}, rmse {rmse_nat:.2f}, mae {mae_nat:.2f}, n={len(doys_true_nat[country])})',
+                   label=f'{country} (r2 {r2_nat:.2f}, MAE {mae_nat:.2f}, N={len(doys_true_nat[country])})',
                    s=3,
                    alpha=0.3,
                    )
@@ -102,7 +106,7 @@ def savefig_scatter_doys_global(doys_true: list,
 
     plt.legend()
 
-    plt.title(f'Global DOY predictions (r2 {r2:.2f}, rmse {rmse:.2f}, mae {mae:.2f}, n={len(doys_true)})')
+    plt.title(f'Global DOY predictions (r2 {r2:.2f}, RMSE {rmse:.2f}, MAE {mae:.2f}, N={len(doys_true)})')
 
     plt.savefig(os.path.join(path_global, fn_global), bbox_inches='tight')
 
@@ -125,7 +129,7 @@ def savefig_scatter_doys_global(doys_true: list,
             doys_pred_nat[country],
             path=path_global,
             fn=fn_nat,
-            title=f'{country} DOY predictions (r2 {r2_nat:.2f}, rmse {rmse_nat:.2f}, mae {mae_nat:.2f}, n={len(doys_true_nat[country])})',
+            title=f'{country} DOY predictions (r2 {r2_nat:.2f}, RMSE {rmse_nat:.2f}, MAE {mae_nat:.2f}, N={len(doys_true_nat[country])})',
         )
 
 
@@ -173,5 +177,5 @@ def savefig_scatter_doys_local(doys_true: list,
             doys_pred_loc[location],
             path=os.path.join(path_local, country.lower()),
             fn=fn_loc,
-            title=f'{location} DOY predictions (r2 {r2_loc:.2f}, rmse {rmse_loc:.2f}, mae {mae_loc:.2f}, n={len(doys_true_loc[location])})',
+            title=f'{location} DOY predictions (r2 {r2_loc:.2f}, RMSE {rmse_loc:.2f}, MAE {mae_loc:.2f}, N={len(doys_true_loc[location])})',
         )
