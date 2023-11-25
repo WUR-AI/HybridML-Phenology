@@ -17,12 +17,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     args.seed = 31
-    args.locations = 'japan_wo_okinawa'
+    args.locations = 'japan_yedoensis_sargentii'
 
     model_cls_1 = LocalChillHoursModel
     model_cls_2 = LocalUtahChillModel
 
-    model_name_1 = model_cls_1.__name__ + '_japan_wo_okinawa_seed_31'
+    model_name_1 = model_cls_1.__name__ + '_japan_wo_okinawa_seed_31'  # TODO -- correct model names
     model_name_2 = model_cls_2.__name__ + '_japan_wo_okinawa_seed_31'
 
     # model_1 = model_cls_1.load(model_name_1)
