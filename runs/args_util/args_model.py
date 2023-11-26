@@ -264,13 +264,16 @@ def fit_model(args: argparse.Namespace, dataset: Dataset) -> tuple:
         - the trained model
         - a dict containing info about the fitting procedure
     """
+    # Obtain the model class that will be trained/evaluated
     model_cls = args.model_cls
+    # Get the model name (if specified, otherwise use the class name)
+    model_name = args.model_name or model_cls.__name__
 
     # TODO -- fit differentiable utah model using grid search
     if issubclass(model_cls, BaseAccumulationModel):
-        return model_cls.fit(dataset)
+        return model_cls.fit(dataset, name=model_name)
     if issubclass(model_cls, BaseLocalAccumulationModel):
-        return model_cls.fit(dataset)
+        return model_cls.fit(dataset, name=model_name)
     if issubclass(model_cls, BaseTorchModel):
         return fit_torch_model_using_args(model_cls,
                                           dataset,

@@ -90,8 +90,10 @@ if __name__ == '__main__':
         model._pm_tbg = model._pm_tbg.as_ungrouped()
     if isinstance(model._pm_slc, GroupedParameterMapping):
         model._pm_slc = model._pm_slc.as_ungrouped()
+        model._pm_slc.freeze()
     if isinstance(model._pm_slg, GroupedParameterMapping):
         model._pm_slg = model._pm_slg.as_ungrouped()
+        model._pm_slg.freeze()
 
     model.freeze_operator_weights()
 
