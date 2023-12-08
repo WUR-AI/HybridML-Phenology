@@ -199,6 +199,7 @@ def _filter_country_data(country: str, *series) -> tuple:
 
 def savefig_locations_on_map(locations: list,
                              path: str,  # TODO
+                             annotate: bool = True,
                              ):
     """
     Save maps showing all the locations included in the data
@@ -239,13 +240,14 @@ def savefig_locations_on_map(locations: list,
             c='red',
             s=2,
         )
-        # Annotate all locations with their name
-        for lat, lon, location in zip(c_lats, c_lons, c_locations):
-            _, site = split_location_token(location)
-            ax.annotate(site,
-                        m(lon, lat),
-                        fontsize=_ANN_FONT_SIZE,
-                        )
+        if annotate:
+            # Annotate all locations with their name
+            for lat, lon, location in zip(c_lats, c_lons, c_locations):
+                _, site = split_location_token(location)
+                ax.annotate(site,
+                            m(lon, lat),
+                            fontsize=_ANN_FONT_SIZE,
+                            )
         # Save the figure
         plt.savefig(os.path.join(path, f'{country}.png'),
                     dpi=_MAP_DPI,
@@ -515,7 +517,7 @@ def savefig_location_annotations_on_map(annotations: list,
             x=c_lons,
             y=c_lats,
             latlon=True,
-            c=colors,
+            c=colors,  # TODO -- this doesnt work with multiple countries
             s=2,
         )
         # Annotate all locations as specified by the input
@@ -543,7 +545,8 @@ if __name__ == '__main__':
     from data.bloom_doy import get_locations
     savefig_locations_on_map(
         get_locations(),
-        os.path.join(config.PATH_FIGURES_DIR, 'location_maps')
+        os.path.join(config.PATH_FIGURES_DIR, 'location_maps'),
+        annotate=False,
     )
 
 

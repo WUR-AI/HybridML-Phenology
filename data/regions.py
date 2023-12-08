@@ -325,22 +325,28 @@ LOCATIONS_OKINAWA = {k: v for k, v in LOCATIONS_REGIONS_JAPAN.items() if v == 10
 if __name__ == '__main__':
     from evaluation.plots.maps import savefig_location_annotations_on_map
 
-    _locations = list(LOCATION_VARIETY_JAPAN.keys())
+    # _locations = list(LOCATION_VARIETY_JAPAN.keys())
+    # _locations = list(LOCATION_VARIETY_SWITZERLAND.keys())
+    _locations = list(LOCATION_VARIETY_SOUTH_KOREA.keys())
+    # _locations = list(LOCATION_VARIETY.keys())
     _cmap = {
         0: 'red',
         1: 'blue',
         2: 'green',
         3: 'purple',
         4: 'orange',
-        5: 'cyan',
+        5: 'brown',
     }
-    _colors = [_cmap[LOCATION_VARIETY_JAPAN[_loc]] for _loc in _locations]
+    # _colors = [_cmap[LOCATION_VARIETY_JAPAN[_loc]] for _loc in _locations]
+    # _colors = [_cmap[LOCATION_VARIETY_SWITZERLAND[_loc]] for _loc in _locations]
+    _colors = [_cmap[LOCATION_VARIETY_SOUTH_KOREA[_loc]] for _loc in _locations]
+    # _colors = [_cmap[LOCATION_VARIETY[_loc]] for _loc in _locations]
 
     savefig_location_annotations_on_map(
-        # annotations=[''] * len(_locations),
-        [_loc.split('/')[1] for _loc in _locations],
+        annotations=[''] * len(_locations),
+        # [_loc.split('/')[1] for _loc in _locations],
         locations=_locations,
-        path='temp',
+        path='variety_distribution',
         colors=_colors,
     )
 

@@ -22,14 +22,14 @@ if __name__ == '__main__':
     model_cls_1 = LocalChillHoursModel
     model_cls_2 = LocalUtahChillModel
 
-    model_name_1 = model_cls_1.__name__ + '_japan_wo_okinawa_seed_31'  # TODO -- correct model names
-    model_name_2 = model_cls_2.__name__ + '_japan_wo_okinawa_seed_31'
+    model_name_1 = model_cls_1.__name__ + '_seed_18'
+    model_name_2 = model_cls_2.__name__ + '_seed_18'
 
-    # model_1 = model_cls_1.load(model_name_1)
-    # model_2 = model_cls_2.load(model_name_2)
+    model_1 = model_cls_1.load(model_name_1)
+    model_2 = model_cls_2.load(model_name_2)
 
-    model_1 = model_cls_1.load(model_cls_1.__name__)  # TODO -- using model name
-    model_2 = model_cls_2.load(model_cls_2.__name__)
+    # model_1 = model_cls_1.load(model_cls_1.__name__)  # TODO -- using model name
+    # model_2 = model_cls_2.load(model_cls_2.__name__)
 
     dataset, _ = get_configured_dataset(args)
 
