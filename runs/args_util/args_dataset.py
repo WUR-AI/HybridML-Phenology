@@ -115,7 +115,7 @@ def get_configured_dataset(args: argparse.Namespace) -> tuple:
 
     # Determine the location train/test split (if any)
     if args.hold_out_locations:
-        locations_train, locations_test = train_test_split(locations,
+        locations_train, locations_test = train_test_split(sorted(locations),
                                                            train_size=args.train_size_locations,
                                                            random_state=seed_location_split,
                                                            shuffle=True,
