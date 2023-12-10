@@ -16,20 +16,17 @@ if __name__ == '__main__':
     configure_argparser_dataset(parser)
     args = parser.parse_args()
 
-    args.seed = 31
+    args.seed = 18
     args.locations = 'japan_yedoensis_sargentii'
 
     model_cls_1 = LocalChillHoursModel
     model_cls_2 = LocalUtahChillModel
 
-    model_name_1 = model_cls_1.__name__ + '_seed_18'
-    model_name_2 = model_cls_2.__name__ + '_seed_18'
+    model_name_1 = model_cls_1.__name__ + '_seed18'
+    model_name_2 = model_cls_2.__name__ + '_seed18'
 
     model_1 = model_cls_1.load(model_name_1)
     model_2 = model_cls_2.load(model_name_2)
-
-    # model_1 = model_cls_1.load(model_cls_1.__name__)  # TODO -- using model name
-    # model_2 = model_cls_2.load(model_cls_2.__name__)
 
     dataset, _ = get_configured_dataset(args)
 
@@ -63,29 +60,29 @@ if __name__ == '__main__':
 
     ax.scatter([Dataset.index_to_doy(ix) for ix in bloom_ixs_pred_m1],
                [Dataset.index_to_doy(ix) for ix in bloom_ixs_pred_m2],
-               c='red',
-               label=f'Bloom DOY',
+               c='darkred',
+               label=f'Bloom DoY',
                s=3,
                alpha=0.3,
                )
 
     ax.scatter([Dataset.index_to_doy(ix) for ix in chill_ixs_pred_m1],
                [Dataset.index_to_doy(ix) for ix in chill_ixs_pred_m2],
-               c='blue',
-               label=f'Chill DOY',
+               c='darkblue',
+               label=f'Chill DoY',
                s=3,
                alpha=0.3,
                )
 
-    ax.set_xlabel('DOY (Chill Hours Model)')
-    ax.set_ylabel('DOY (Utah Chill Model)')
+    ax.set_xlabel('DoY (Chill Hours Model)')
+    ax.set_ylabel('DoY (Utah Chill Model)')
 
-    # ax.set_xlim(0, 200)
-    # ax.set_ylim(0, 200)
+    ax.set_xlim(0, 200)
+    ax.set_ylim(0, 200)
 
     plt.legend()
 
-    plt.savefig(fn)
+    plt.savefig(fn, bbox_inches='tight', dpi=400)
 
     plt.cla()
     plt.close()

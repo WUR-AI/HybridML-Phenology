@@ -147,6 +147,8 @@ class BaseTorchAccumulationModel(BaseTorchModel):
 
             # 'units_g_cs': units_g_cs,
 
+            'ix_chill': (1 - (units_g_cs >= th_g).to(torch.int)).sum(dim=-1),
+
             **optional_info,
         }
 
