@@ -32,7 +32,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     model_cls = NNChillModel
-    model_name = model_cls.__name__ + '_seed18_Japan'
+    model_name = model_cls.__name__ + '_japan_seed18'
 
     model_name = model_name or model_cls.__name__
 
@@ -112,11 +112,18 @@ if __name__ == '__main__':
         k: len(v) for k, v in entries.items()
     }
 
-    grid = np.zeros((len(range_temperature), len(range_temperature)))
+    grid_mean = np.zeros((len(range_temperature), len(range_temperature)))
+    grid_std = np.zeros((len(range_temperature), len(range_temperature)))
+    grid_count = np.zeros((len(range_temperature), len(range_temperature)))
+
     for (t_min, t_max), v in entries_mean.items():
-    # for (t_min, t_max), v in entries_std.items():
-    # for (t_min, t_max), v in entries_count.items():
-        grid[range_ix_temperature[t_min], range_ix_temperature[t_max]] = v
+        grid_mean[range_ix_temperature[t_min], range_ix_temperature[t_max]] = v
+
+    for (t_min, t_max), v in entries_std.items():
+        grid_std[range_ix_temperature[t_min], range_ix_temperature[t_max]] = v
+
+    for (t_min, t_max), v in entries_count.items():
+        grid_count[range_ix_temperature[t_min], range_ix_temperature[t_max]] = v
 
     # grid[range_ix_temperature[-30], range_ix_temperature[30]] = 1
 
@@ -124,10 +131,15 @@ if __name__ == '__main__':
     # plt.ylim((min_temperature, max_temperature))
     # plt.ylim((max_temperature, min_temperature))
 
-    plt.xlabel('t min')
-    plt.ylabel('t max')
+    # grid = grid_mean
+    # grid = grid_std
+    # grid = grid_count
 
-    print(grid.max())
+    fig, axs = plt.subplots(1, 3)
+
+
+
+    # print(grid.max())
 
     # left = min_temperature
     # right = max_temperature
@@ -141,8 +153,28 @@ if __name__ == '__main__':
 
     extent = [left, right, bottom, top]
 
-    plt.imshow(grid, extent=extent)
-    # plt.savefig('temp_response.png')
+    cax0 = axs[0].imshow(grid_mean, extent=extent)
+    cax1 = axs[1].imshow(grid_std, extent=extent)
+    cax2 = axs[2].imshow(grid_count, extent=extent)
+
+    fontsize = 5
+    axs[0].set_xlabel('t min', fontsize=fontsize)
+    axs[0].set_ylabel('t max', fontsize=fontsize)
+    axs[1].set_xlabel('t min', fontsize=fontsize)
+    axs[1].set_ylabel('t max', fontsize=fontsize)
+    axs[2].set_xlabel('t min', fontsize=fontsize)
+    axs[2].set_ylabel('t max', fontsize=fontsize)
+
+    axs[0].set_title('mean')
+    axs[1].set_title('std')
+    axs[2].set_title('count')
+
+    # plt.colorbar(cax=cax0)
+
+    plt.xticks(fontsize=fontsize)
+    plt.yticks(fontsize=fontsize)
+
+    plt.savefig('temp_response.png', bbox_inches='tight')
 
 
 
