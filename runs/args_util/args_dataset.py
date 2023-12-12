@@ -56,7 +56,13 @@ def configure_argparser_dataset(parser: argparse.ArgumentParser) -> argparse.Arg
                         )
     parser.add_argument('--hold_out_locations',
                         action='store_true',
-                        help='If set, an additional train/test split will be done on the specified locations')
+                        help='If set, an additional train/test split will be done on the specified locations',
+                        )
+    parser.add_argument('--exclude_locations',
+                        action='store_true',
+                        help='If set, a set of locations will be excluded from the dataset (equivalent to the set of '
+                             'locations that would have been held out as a test set if the --hold_out_locations '
+                             'flag is set). ')
     parser.add_argument('--seed_location_split',
                         type=int,
                         help='Seed that is used when splitting locations. Set to config.seed by default. Ignored if '
@@ -113,6 +119,7 @@ def get_configured_dataset(args: argparse.Namespace) -> tuple:
     # Get the locations used based on the provided group name
     locations = LOCATION_GROUPS[args.locations]
 
+    assert not (args.hold_out_locations and args.exclude_locations)
     # Determine the location train/test split (if any)
     if args.hold_out_locations:
         locations_train, locations_test = train_test_split(sorted(locations),
@@ -120,6 +127,13 @@ def get_configured_dataset(args: argparse.Namespace) -> tuple:
                                                            random_state=seed_location_split,
                                                            shuffle=True,
                                                            )
+    elif args.exclude_locations:
+        locations_train, locations_test = train_test_split(sorted(locations),
+                                                           train_size=args.train_size_locations,
+                                                           random_state=seed_location_split,
+                                                           shuffle=True,
+                                                           )
+        locations_test = locations_train
     else:
         locations_train, locations_test = locations, locations
 
