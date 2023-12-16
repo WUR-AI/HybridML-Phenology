@@ -20,14 +20,18 @@ class FixedParameterModel(ParameterModel):
 
     def __init__(self, c: float):
         super().__init__()
-        self._c = nn.Parameter(torch.Tensor(c), requires_grad=False)
+        self._c = nn.Parameter(torch.tensor(c), requires_grad=False)
 
     def get_parameters(self, xs: dict) -> torch.Tensor:
         return torch.ones(len(xs['location'])).unsqueeze(-1).to(self._c.device) * self._c
 
     @property
-    def value(self) -> float:  # TODO -- setter
+    def value(self) -> float:
         return self._c.item()
+
+    @value.setter
+    def value(self, value: float) -> None:  # TODO -- set within parameter object?
+        self._c = nn.Parameter(torch.tensor(value), requires_grad=False)
 
 
 class GroupedParameterMapping(ParameterModel):

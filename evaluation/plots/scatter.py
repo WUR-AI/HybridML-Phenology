@@ -18,7 +18,7 @@ def savefig_scatter_doys(doys_true: list,
                          colors: list = None,
                          ):
     assert len(doys_true) == len(doys_pred)
-    colors = colors or ['black'] * len(doys_true)
+    colors = colors or ['darkred'] * len(doys_true)
     os.makedirs(path, exist_ok=True)
 
     fig, ax = plt.subplots()
