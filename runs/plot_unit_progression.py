@@ -1,9 +1,12 @@
 import argparse
+import os
+import random
 
 import numpy as np
 from matplotlib import pyplot as plt
 
 import torch
+from tqdm import tqdm
 
 import config
 from datasets.dataset import Dataset
@@ -52,64 +55,77 @@ if __name__ == '__main__':
     model.set_mode_test()
 
     # location = dataset.locations_test[0]
-    location = 'Switzerland/Cevio-Cavergno'
-    year = dataset.years_test[0]
+    # location = 'Switzerland/Cevio-Cavergno'
+    # year = dataset.years_test[0]
 
-    data_ix = (year, location)
+    folder_name = 'temp_responses'
+    os.makedirs(os.path.join(config.PATH_FIGURES_DIR, folder_name), exist_ok=True)
 
-    sample = dataset[data_ix]
+    for data_ix in tqdm(dataset.get_test_indices()):
 
-    ix_pred, _, info = model.predict_ix(sample)
+    # data_ix = random.choice(dataset.get_test_indices())
 
-    ix_true = sample['bloom_ix']
+    # data_ix = (year, location)
 
-    debug_info = info['forward_pass']['debug']
+        year, location = data_ix
 
-    temperatures = np.reshape(sample['temperature'], newshape=-1)
+        sample = dataset[data_ix]
 
-    units_chill = np.reshape(debug_info['units_c'], newshape=-1)
-    units_growth = np.reshape(debug_info['units_g_masked'], newshape=-1)
+        ix_pred, _, info = model.predict_ix(sample)
 
-    req_c = np.reshape(debug_info['req_c'], newshape=-1)
-    req_g = np.reshape(debug_info['req_g'], newshape=-1)
+        ix_true = sample['bloom_ix']
 
-    th_c = debug_info['th_c'][0]
-    th_g = debug_info['th_g'][0]
-    tb_g = debug_info['tb_g'][0]
+        debug_info = info['forward_pass']['debug']
 
-    """
-        Create plot
-    """
+        # temperatures = np.reshape(sample['temperature'], newshape=-1)
+        temperatures = sample['temperature']
 
-    fig, axs = plt.subplots(6)
-    fig.set_size_inches(18.5, 18.5)
+        units_chill = np.reshape(debug_info['units_c'], newshape=-1)
+        units_growth = np.reshape(debug_info['units_g_masked'], newshape=-1)
 
-    fig.suptitle(f'loc: {location}, year: {year}')
+        req_c = np.reshape(debug_info['req_c'], newshape=-1)
+        req_g = np.reshape(debug_info['req_g'], newshape=-1)
 
-    axs[0].plot(temperatures, label='temp')
+        th_c = debug_info['th_c'][0]
+        th_g = debug_info['th_g'][0]
+        tb_g = debug_info['tb_g'][0]
 
-    axs[1].plot(units_chill, label='units_chill')
-    axs[2].plot(units_growth, label=f'units_growth')
+        """
+            Create plot
+        """
 
-    axs[3].plot(np.cumsum(units_chill, axis=-1), label='units sum chill')
-    axs[3].plot([th_c for _ in range(len(units_chill))], '--')
+        fig, axs = plt.subplots(6)
+        fig.set_size_inches(18.5, 18.5)
 
-    axs[4].plot(np.cumsum(units_growth, axis=-1), label='units sum growth')
-    axs[4].plot([th_g for _ in range(len(units_growth))], '--')
+        fig.suptitle(f'loc: {location}, year: {year}')
 
-    axs[5].plot(req_c, label='req chill')
-    axs[5].plot(req_g, label='req growth')
+        # axs[0].plot(temperatures, label='temp')
+        axs[0].plot(temperatures.mean(axis=-1), label='temp')
+        # axs[0].plot(temperatures, label='temp')
+        # axs[0].plot(temperatures, label='temp')
 
-    axs[5].axvline(ix_true, c='red')
-    axs[5].axvline(ix_pred, c='blue')
+        axs[1].plot(units_chill, label='units_chill')
+        axs[2].plot(units_growth, label=f'units_growth')
 
-    axs[0].legend()
-    axs[1].legend()
-    axs[2].legend()
-    axs[3].legend()
-    axs[4].legend()
-    axs[5].legend()
+        axs[3].plot(np.cumsum(units_chill, axis=-1), label='units sum chill')
+        axs[3].plot([th_c for _ in range(len(units_chill))], '--')
 
-    plt.savefig('temp_unit_progression_nll.png')
-    plt.cla()
-    plt.close()
+        axs[4].plot(np.cumsum(units_growth, axis=-1), label='units sum growth')
+        axs[4].plot([th_g for _ in range(len(units_growth))], '--')
+
+        axs[5].plot(req_c, label='req chill')
+        axs[5].plot(req_g, label='req growth')
+
+        axs[5].axvline(ix_true, c='red')
+        axs[5].axvline(ix_pred, c='blue')
+
+        axs[0].legend()
+        axs[1].legend()
+        axs[2].legend()
+        axs[3].legend()
+        axs[4].legend()
+        axs[5].legend()
+
+        plt.savefig(f'temp_unit_progression_{location.replace("/", "_")}_{year}.png')
+        plt.cla()
+        plt.close()

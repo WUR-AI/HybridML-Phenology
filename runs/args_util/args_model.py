@@ -8,6 +8,7 @@ from models.base_torch import DummyTorchModel, BaseTorchModel
 from models.base_torch_accumulation import BaseTorchAccumulationModel
 from models.components.param_v3 import LocalParameterMapping, GlobalParameterMapping, GroupedParameterMapping
 from models.diff_utah import DiffUtahModel
+from models.lstm import LSTMModel
 from models.mean import MeanModel
 from models.nn_chill_operator import NNChillModel
 from models.process_based.base_accumulation import BaseAccumulationModel, BaseLocalAccumulationModel
@@ -56,6 +57,9 @@ MODELS = [
 
     # Learned chill operator
     NNChillModel,
+
+    # LSTM baseline
+    LSTMModel,
 
 ]
 
