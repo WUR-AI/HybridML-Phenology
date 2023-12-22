@@ -69,7 +69,7 @@ if __name__ == '__main__':
     for x in dataloader:
         x = TorchDatasetWrapper.normalize(x)
 
-        us = chill_operator_model(x).squeeze(0) / 24
+        us = chill_operator_model(x).squeeze(0)
 
         ts = x['temperature']
 
