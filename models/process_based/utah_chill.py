@@ -46,6 +46,9 @@ class UtahChillModel(BaseAccumulationModel):
         # gr_min = 0
         # gr_max = 2000
         # gr_step = 25
+        # gr_min = 0
+        # gr_max = 600
+        # gr_step = 2
         gr_min = 0
         gr_max = 600
         gr_step = 7.5

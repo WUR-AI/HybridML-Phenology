@@ -76,15 +76,25 @@ class BaseTorchAccumulationModel(BaseTorchModel):
 
     def forward(self,
                 xs: dict,
+                th_c: torch.Tensor = None,
+                th_g: torch.Tensor = None,
+                tb_g: torch.Tensor = None,
+                sl_c: torch.Tensor = None,
+                sl_g: torch.Tensor = None,
                 ) -> tuple:
 
         debug_info = dict()
 
-        th_c = self._pm_thc.get_parameters(xs)
-        th_g = self._pm_thg.get_parameters(xs)
-        tb_g = self._pm_tbg.get_parameters(xs)
-        sl_c = self._pm_slc.get_parameters(xs)
-        sl_g = self._pm_slg.get_parameters(xs)
+        if th_c is None:
+            th_c = self._pm_thc.get_parameters(xs)
+        if th_g is None:
+            th_g = self._pm_thg.get_parameters(xs)
+        if tb_g is None:
+            tb_g = self._pm_tbg.get_parameters(xs)
+        if sl_c is None:
+            sl_c = self._pm_slc.get_parameters(xs)
+        if sl_g is None:
+            sl_g = self._pm_slg.get_parameters(xs)
 
         units_c, units_g = self.f_units(xs, tb_g)
 
@@ -210,6 +220,28 @@ class BaseTorchAccumulationModel(BaseTorchModel):
         self._inf_mode = self._inf_mode_test
         super().set_mode_test()
 
+    def _batch_predict_ix_with_parameters(self,
+                                          xs: list,
+                                          th_c: float,
+                                          th_g: float,
+                                          tb_g: float,
+                                          ) -> list:
+        assert self._fit_info is not None
+
+        with torch.no_grad():
+            xs = [self._transform(x) for x in xs]
+            xs = [self._normalize_sample(x) for x in xs]
+            xs = self._collate_fn(xs)
+            ixs, info = self(xs,
+                             th_c=torch.ones_like(xs['bloom_doy']).unsqueeze(-1) * th_c,
+                             th_g=torch.ones_like(xs['bloom_doy']).unsqueeze(-1) * th_g,
+                             tb_g=torch.ones_like(xs['bloom_doy']).unsqueeze(-1) * tb_g,
+                             )
+            # ixs = [int(ix.item()) for ix in ixs]
+            ixs = self._ixs_to_int(ixs)
+
+        return [(ix, True, info) for ix in ixs]
+
     @classmethod
     def _fit_grid(cls,
                   dataset: Dataset,
@@ -220,6 +252,10 @@ class BaseTorchAccumulationModel(BaseTorchModel):
         model_kwargs = model_kwargs or dict()
 
         model = model or cls(**model_kwargs)
+
+        # model._pm_thc = FixedParameterModel(0)
+        # model._pm_thg = FixedParameterModel(0)
+        # model._pm_tbg = FixedParameterModel(0)
 
         # Do a grid search for locations separately
         # Store results in a list of dataframes
@@ -294,18 +330,18 @@ class BaseTorchAccumulationModel(BaseTorchModel):
         # Unpack parameter values
         (i_tb, tb), (i_cr, cr), (i_gr, gr) = params
 
-        t_tb = torch.tensor([tb]).view(1, 1)
-        t_cr = torch.tensor([cr]).view(1, 1) / cls.SCALE_CHILL
-        t_gr = torch.tensor([gr]).view(1, 1) / cls.SCALE_GROWTH
+        # model._pm_thc.value = cr / BaseTorchAccumulationModel.SCALE_CHILL
+        # model._pm_thg.value = gr / BaseTorchAccumulationModel.SCALE_GROWTH
+        # model._pm_tbg.value = tb
 
         doys_true = [x['bloom_ix'] for x in xs]
 
-        def _get_params(*_) -> tuple:
-            return t_cr, t_gr, t_tb
-
-        model.f_parameters = _get_params
-
-        results = model.batch_predict_ix(xs)
+        # results = model.batch_predict_ix(xs)
+        results = model._batch_predict_ix_with_parameters(xs,
+                                                          th_c=cr / BaseTorchAccumulationModel.SCALE_CHILL,
+                                                          th_g=gr / BaseTorchAccumulationModel.SCALE_GROWTH,
+                                                          tb_g=tb,
+                                                          )
         doys_pred = [doy for doy, _, _ in results]
 
         # Compute metrics
