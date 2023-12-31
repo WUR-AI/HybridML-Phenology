@@ -207,12 +207,12 @@ def get_locations_coordinates() -> pd.DataFrame:
 
 if __name__ == '__main__':
 
-    print(get_locations_coordinates_japan().to_dict(orient='index'))
+    # print(get_locations_coordinates_japan().to_dict(orient='index'))
 
-    # _data = get_data(set_index=True)
+    _data = get_data(set_index=True)
     #
     # print(_data.columns)
     # print()
-    # print(_data)
+    print(_data)
 
 

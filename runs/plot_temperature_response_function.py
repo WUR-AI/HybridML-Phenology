@@ -1,4 +1,5 @@
 import argparse
+import os.path
 from collections import defaultdict
 
 import numpy as np
@@ -15,22 +16,41 @@ from models.nn_chill_operator import NNChillModel
 from phenology.chill.utah_model import utah_chill
 from runs.args_util.args_dataset import configure_argparser_dataset, get_configured_dataset
 from runs.args_util.args_main import configure_argparser_main
-
+from runs.args_util.args_model import MODELS_KEYS_TO_CLS
 
 if __name__ == '__main__':
+
+    # TODO -- implement for pb models as well
 
     parser = argparse.ArgumentParser()
     configure_argparser_main(parser)
     configure_argparser_dataset(parser)
 
+    parser.add_argument('--model_cls',
+                        type=str,
+                        choices=list(MODELS_KEYS_TO_CLS.keys()),
+                        required=True,
+                        help='Specify the model class that is to be trained/evaluated',
+                        )
+    parser.add_argument('--model_name',
+                        type=str,
+                        help='Optionally specify a name for the model. If none is provided the model class will be '
+                             'used. The name is used for storing model weights and evaluation files',
+                        )
+
     args = parser.parse_args()
 
-    model_cls = NNChillModel
-    model_name = model_cls.__name__ + '_japan_seed18'
-    # model_name = model_cls.__name__ + '_japan_seed5'
-    # model_name = model_cls.__name__ + '_japan_seed18_yedoensis'
+    seed = args.seed
 
-    model_name = model_name or model_cls.__name__
+    # model_cls = NNChillModel
+    # # model_name = model_cls.__name__ + f'_japan_seed{seed}'
+    # # model_name = model_cls.__name__ + '_japan_seed5'
+    # # model_name = model_cls.__name__ + f'_japan_seed{seed}_yedoensis'
+    #
+    # model_name = 'NNChillModel_japan_seed79_decay'
+
+    model_cls = MODELS_KEYS_TO_CLS[args.model_cls]
+    model_name = args.model_name or model_cls.__name__
 
     assert issubclass(model_cls, BaseModel)
 
@@ -143,4 +163,17 @@ if __name__ == '__main__':
 
     plt.imshow(grid, origin='lower')
 
-    plt.savefig('temp.png', bbox_inches='tight')
+    axs.set_xticks(np.arange(0, (tmax-tmin), 10) * 2, np.arange(tmin, tmax, 10))
+    axs.set_yticks([0, (n_bins_resp - 1) // 2, n_bins_resp - 1], [0, 0.5, 1])
+
+    # plt.xlabel('Mean Temperature (°C)')
+    # plt.ylabel('$u^{(c)}$')
+
+    fn = 'response_over_mean_temperature.png'
+    path = os.path.join(config.PATH_FIGURES_DIR,
+                        model_cls.__name__,
+                        model_name,
+                        'plot_temperature_response')
+    os.makedirs(path, exist_ok=True)
+
+    plt.savefig(os.path.join(path, fn), bbox_inches='tight')

@@ -169,6 +169,10 @@ def configure_argparser_fit_torch(parser: argparse.ArgumentParser) -> argparse.A
                         default=1e-2,
                         help='Learning rate',
                         )
+    parser.add_argument('--weight_decay',
+                        type=float,
+                        default=None,
+                        help='Optimizer weight decay regularization')
     parser.add_argument('--disable_cuda',
                         action='store_true',
                         help='Flag that controls whether GPU usage should be disabled',
@@ -313,6 +317,12 @@ def fit_torch_model_using_args(model_cls: callable,
         model_kwargs['parameter_model_slc'] = _param_model_from_key(args, args.parameter_model_tbg, init_value=1.0)
         model_kwargs['parameter_model_slg'] = _param_model_from_key(args, args.parameter_model_tbg, init_value=1.0)
 
+    kwargs_optim = {
+        'lr': args.lr,
+    }
+    if args.weight_decay is not None:
+        kwargs_optim['weight_decay'] = args.weight_decay
+
     kwargs = {
         'num_epochs': args.num_epochs,
         'batch_size': args.batch_size,
@@ -320,9 +330,7 @@ def fit_torch_model_using_args(model_cls: callable,
         'scheduler_decay': args.scheduler_decay,
         'clip_gradient': args.clip_gradient,
         'f_optim': TORCH_OPTIMIZERS[args.optimizer],
-        'optim_kwargs': {
-            'lr': args.lr,
-        },
+        'optim_kwargs': kwargs_optim,
         'device': device,
         'model_kwargs': model_kwargs,
     }
