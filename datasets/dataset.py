@@ -8,6 +8,8 @@ import pickle
 import config
 import data.bloom_doy
 import data.merra_v2
+from data.era5 import get_era5_temperature_data
+
 from util.photoperiod import photoperiod
 
 
@@ -50,6 +52,8 @@ class Dataset:
     DOYS = (np.arange(SEASON_LENGTH) - DOY_SHIFT).astype(int)
     SEASON_END_DOY = DOYS[-1]
 
+    SOURCES_TEMPERATURE = ('merra_v2', 'era5')
+
     def __init__(self,
                  year_split: tuple,
                  locations_train: list = None,
@@ -59,6 +63,7 @@ class Dataset:
                  include_temperature: bool = False,
                  include_photoperiod: bool = False,
                  temperature_unit: str = 'C',
+                 temperature_src: str = SOURCES_TEMPERATURE[0],
                  ):
         """
         Temperature dataset class
@@ -175,13 +180,16 @@ class Dataset:
             # The dataset consists of a DataFrame with hourly temperature statistics for the relevant locations
             # The DataFrame is indexed by the date (numpy.datetime64). Each location corresponds to one column
             # Each entry is a numpy.ndarray containing 24 float32 values corresponding to hourly temperature estimates
-            self._data_t = data.merra_v2.get_data_temperature(unit=temperature_unit)
+            if temperature_src == 'merra_v2':
+                self._data_t = data.merra_v2.get_data_temperature(unit=temperature_unit)
+            elif temperature_src == 'era5':
+                self._data_t = get_era5_temperature_data()
+            else:
+                raise Exception('Unknown temperature source {}'.format(temperature_src))
         else:
             self._data_t = None
 
         self._includes_photoperiod = include_photoperiod
-
-        pass  # TODO -- soil moisture
 
     def __len__(self):
         return len(self._data_doy)
@@ -220,8 +228,6 @@ class Dataset:
                 doy=doy,
                 verbose=False,
             ) for doy in Dataset.DOYS]
-
-        # TODO -- soil moisture
 
         return {
             'lat': sample_doy.lat,

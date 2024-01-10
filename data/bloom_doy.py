@@ -214,5 +214,8 @@ if __name__ == '__main__':
     # print(_data.columns)
     # print()
     print(_data)
+    print(_data.iloc[_data.index.get_level_values('year') == 2000])
+
+
 
 

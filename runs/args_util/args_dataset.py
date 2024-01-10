@@ -74,6 +74,12 @@ def configure_argparser_dataset(parser: argparse.ArgumentParser) -> argparse.Arg
                         help='Percentage (between 0-1) of locations that is used for training. Remainder is used for '
                              'testing',
                         )
+    parser.add_argument('--temperature_src',
+                        type=str,
+                        choices=Dataset.SOURCES_TEMPERATURE,
+                        default=Dataset.SOURCES_TEMPERATURE[0],
+                        help='Source of temperature data',
+                        )
 
     return parser
 
@@ -148,6 +154,7 @@ def get_configured_dataset(args: argparse.Namespace) -> tuple:
         'locations_test': locations_test,
         'include_temperature': args.include_temperature,
         'include_photoperiod': args.include_photoperiod,
+        'temperature_src': args.temperature_src,
     }
 
     # Initialize the dataset
