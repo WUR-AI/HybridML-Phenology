@@ -43,6 +43,8 @@ LOCATION_GROUPS = {
     'japan_tokyo': ['Japan/Tokyo'],
     'japan_kyoto': ['Japan/Kyoto-1'],
 
+    'japan_switzerland_known_variety': list(data.regions.LOCATION_VARIETY_JAPAN.keys()) + data.bloom_doy.get_locations_switzerland(),
+
     # All selected locations to be included in comparing the process-based models with the learned chill model
     # Includes:
     #   - Japan (only locations with yedoensis and sargentii cultivars)

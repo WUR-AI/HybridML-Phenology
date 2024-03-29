@@ -59,7 +59,8 @@ if __name__ == '__main__':
     # year = dataset.years_test[0]
 
     folder_name = 'temp_responses'
-    os.makedirs(os.path.join(config.PATH_FIGURES_DIR, folder_name), exist_ok=True)
+    path = os.path.join(config.PATH_FIGURES_DIR, model_cls.__name__, model_name, folder_name)
+    os.makedirs(path, exist_ok=True)
 
     for data_ix in tqdm(dataset.get_test_indices()):
 
@@ -99,33 +100,75 @@ if __name__ == '__main__':
 
         fig.suptitle(f'loc: {location}, year: {year}')
 
-        # axs[0].plot(temperatures, label='temp')
-        axs[0].plot(temperatures.mean(axis=-1), label='temp')
-        # axs[0].plot(temperatures, label='temp')
-        # axs[0].plot(temperatures, label='temp')
+        axs[0].plot(temperatures.mean(axis=-1),
+                    # label='Temperature (Celsius)',
+                    )
 
-        axs[1].plot(units_chill, label='units_chill')
-        axs[2].plot(units_growth, label=f'units_growth')
+        axs[1].plot(units_chill,
+                    # label='$u^{(c)}$',
+                    color='darkblue',
+                    )
+        axs[2].plot(units_growth,
+                    # label='$u^{(h)}$',
+                    color='darkred',
+                    )
 
-        axs[3].plot(np.cumsum(units_chill, axis=-1), label='units sum chill')
-        axs[3].plot([th_c for _ in range(len(units_chill))], '--')
+        # axs[3].plot(np.cumsum(units_chill, axis=-1), label='units sum chill')
+        axs[3].plot(np.cumsum(units_chill, axis=-1),
+                    # label='$U^{(c)}$',
+                    color='darkblue',
+                    )
+        axs[3].plot([th_c for _ in range(len(units_chill))],
+                    '--',
+                    color='black',
+                    label=r'$\beta^{(c)}$',
+                    )
 
-        axs[4].plot(np.cumsum(units_growth, axis=-1), label='units sum growth')
-        axs[4].plot([th_g for _ in range(len(units_growth))], '--')
+        # axs[4].plot(np.cumsum(units_growth, axis=-1), label='units sum growth')
+        axs[4].plot(np.cumsum(units_growth, axis=-1),
+                    # label='$U^{(h)}$',
+                    color='darkred',
+                    )
+        axs[4].plot([th_g for _ in range(len(units_growth))],
+                    '--',
+                    color='black',
+                    label=r'$\beta^{(h)}$',
+                    )
 
-        axs[5].plot(req_c, label='req chill')
-        axs[5].plot(req_g, label='req growth')
+        axs[5].plot(req_c,
+                    label='$r^{(c)}$',
+                    color='darkblue',
+                    )
+        # axs[5].plot(req_c, label='req chill')
+        axs[5].plot(req_g,
+                    label='$r^{(h)}$',
+                    color='darkred',
+                    )
+        # axs[5].plot(req_g, label='req growth')
 
-        axs[5].axvline(ix_true, c='red')
-        axs[5].axvline(ix_pred, c='blue')
+        axs[5].axvline(ix_true, c='black')
+        axs[5].axvline(ix_pred, c='red')
 
-        axs[0].legend()
-        axs[1].legend()
-        axs[2].legend()
-        axs[3].legend()
-        axs[4].legend()
-        axs[5].legend()
+        fontsize_axes = 24
+        axs[5].set_xlabel('Time (days)', fontsize=fontsize_axes)
 
-        plt.savefig(f'temp_unit_progression_{location.replace("/", "_")}_{year}.png')
+        axs[0].set_ylabel(r'Temp (°C)', fontsize=fontsize_axes)
+        axs[1].set_ylabel(r'$u^{(c)}$', fontsize=fontsize_axes)
+        axs[2].set_ylabel(r'$u^{(h)}$', fontsize=fontsize_axes)
+        axs[3].set_ylabel(r'$U^{(c)}$', fontsize=fontsize_axes)
+        axs[4].set_ylabel(r'$U^{(h)}$', fontsize=fontsize_axes)
+        # axs[5].set_ylabel(r'$')
+
+        fontsize_legend = 24
+        # axs[0].legend(fontsize=fontsize_legend)
+        # axs[1].legend(fontsize=fontsize_legend)
+        # axs[2].legend(fontsize=fontsize_legend)
+        axs[3].legend(fontsize=fontsize_legend)
+        axs[4].legend(fontsize=fontsize_legend)
+        axs[5].legend(fontsize=fontsize_legend)
+
+        fn = f'temp_unit_progression_{location.replace("/", "_")}_{year}.png'
+
+        plt.savefig(os.path.join(path, fn))
         plt.cla()
         plt.close()

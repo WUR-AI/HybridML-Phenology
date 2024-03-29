@@ -6,6 +6,7 @@ from mpl_toolkits.basemap import Basemap
 
 import config
 from data.bloom_doy import get_locations_coordinates
+
 from datasets.dataset import split_location_token
 
 
@@ -541,13 +542,99 @@ def savefig_location_annotations_on_map(annotations: list,
 # TODO -- regional plots
 
 
+def plot_cultivar_maps() -> None:
+    from data.regions import LOCATION_VARIETY_JAPAN, LOCATION_VARIETY_SWITZERLAND, LOCATION_VARIETY_SOUTH_KOREA, \
+        LOCATION_VARIETY
+
+    colors_map = {
+        0: 'red',
+        1: 'blue',
+        2: 'green',
+        3: 'purple',
+        4: 'orange',
+        5: 'brown',
+    }
+    # color = 'red'
+    # colors_map = {
+    #     0: color,
+    #     1: color,
+    #     2: color,
+    #     3: color,
+    #     4: color,
+    #     5: color,
+    # }
+    marker_map = {
+        0: '.',
+        1: 'x',
+        2: '*',
+        3: 's',
+        4: 'D',
+        5: '^',
+    }
+
+    # Get all location coordinates
+    location_data = get_locations_coordinates()
+
+    for country, locations_varieties in zip(
+            [
+                'Japan',
+                'Switzerland',
+                'South Korea',
+            ],
+            [
+                # LOCATION_VARIETY_JAPAN,
+                {**LOCATION_VARIETY_JAPAN, **LOCATION_VARIETY_SOUTH_KOREA},
+                LOCATION_VARIETY_SWITZERLAND,
+                LOCATION_VARIETY_SOUTH_KOREA,
+            ]
+    ):
+
+        locations = list(locations_varieties.keys())
+
+        # Create the figure
+        fig, ax = plt.subplots()
+        # Obtain this country's basemap
+        m = _get_country_basemap(country)
+
+        for variety in set(locations_varieties.values()):
+
+            v_locs = [loc for loc in locations if locations_varieties[loc] == variety]
+
+            lats = location_data.loc[v_locs]['lat'].values
+            lons = location_data.loc[v_locs]['long'].values
+
+            m.scatter(
+                x=lons,
+                y=lats,
+                latlon=True,
+                c=colors_map[variety],
+                s=8,
+                marker=marker_map[variety],
+            )
+
+        path = os.path.join(config.PATH_FIGURES_DIR, 'variety_distribution')
+        os.makedirs(path, exist_ok=True)
+
+        # Save the figure
+        os.makedirs(path, exist_ok=True)
+        plt.savefig(os.path.join(path, f'{country}.png'),
+                    dpi=_MAP_DPI,
+                    bbox_inches='tight',
+                    )
+        # Clear results for constructing the next figure
+        plt.cla()
+        plt.close()
+
+
 if __name__ == '__main__':
-    from data.bloom_doy import get_locations
-    savefig_locations_on_map(
-        get_locations(),
-        os.path.join(config.PATH_FIGURES_DIR, 'location_maps'),
-        annotate=False,
-    )
+    # from data.bloom_doy import get_locations
+    # savefig_locations_on_map(
+    #     get_locations(),
+    #     os.path.join(config.PATH_FIGURES_DIR, 'location_maps'),
+    #     annotate=False,
+    # )
+
+    plot_cultivar_maps()
 
 
 # if __name__ == '__main__':
