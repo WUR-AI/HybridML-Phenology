@@ -6,6 +6,9 @@ This repository contains the code used for combining biophysical process-based m
 
 The code can be used to reproduce the results of the manuscript titled "A hybrid of deep learning and process based model components improves phenology  predictions".
 
+
+[//]: # (![Schematic overview of the model structure]&#40;figures/schematic_overview.png&#41;)
+
 ![Probability of cherry trees having flowered in Japan throughout the year 2000 according to our model](figures/prob_map.gif) 
 
 
