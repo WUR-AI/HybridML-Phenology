@@ -8,7 +8,9 @@ import pickle
 import config
 import data.bloom_doy
 import data.merra_v2
+
 from data.era5 import get_era5_temperature_data
+from data.era5_switzerland import get_era5_temperature_data as get_era5_switzerland_temperature_data
 
 from util.photoperiod import photoperiod
 
@@ -52,7 +54,7 @@ class Dataset:
     DOYS = (np.arange(SEASON_LENGTH) - DOY_SHIFT).astype(int)
     SEASON_END_DOY = DOYS[-1]
 
-    SOURCES_TEMPERATURE = ('merra_v2', 'era5')
+    SOURCES_TEMPERATURE = ('merra_v2', 'era5', 'era5_switzerland')
 
     def __init__(self,
                  year_split: tuple,
@@ -184,6 +186,8 @@ class Dataset:
                 self._data_t = data.merra_v2.get_data_temperature(unit=temperature_unit)
             elif temperature_src == 'era5':
                 self._data_t = get_era5_temperature_data()
+            elif temperature_src == 'era5_switzerland':
+                self._data_t = get_era5_switzerland_temperature_data()
             else:
                 raise Exception('Unknown temperature source {}'.format(temperature_src))
         else:

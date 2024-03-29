@@ -25,7 +25,9 @@
 ./scripts/fine_tune_yedoensis.sh
 
 # FIT PROCESS-BASED MODELS WITH CULTIVAR PARAMETERS
-./scripts/train_pb_cultivar.sh
+./scripts/train_pb_hour_cultivar.sh
+./scripts/train_pb_utah_cultivar.sh
+./scripts/train_pb_days_cultivar.sh
 
 # ABLATION
 # - TRAIN DIFFERENTIABLE APPROXIMATION TO UTAH MODEL
@@ -37,3 +39,6 @@
 
 # PLOT UTAH CHILL FUNCTION AND DOUBLE LOGISTIC APPROXIMATION
 python3 -m runs.plot_logistic
+
+# PLOT TEMPERATURE RESPONSE
+./scripts/plot_learned_temperature_function.sh
