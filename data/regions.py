@@ -322,8 +322,18 @@ LOCATIONS_KYUSHU_SOUTH_AMAMI = {k: v for k, v in LOCATIONS_REGIONS_JAPAN.items()
 LOCATIONS_OKINAWA = {k: v for k, v in LOCATIONS_REGIONS_JAPAN.items() if v == 10}
 
 
+LOCATIONS_JUJI = [
+    'South Korea/Jeju',
+    'South Korea/Seongsan',
+    'South Korea/Seogwipo',
+]
+LOCATIONS_SOUTH_KOREA_WO_JUJI = [loc for loc in get_locations_south_korea() if loc not in LOCATIONS_JUJI]
+
+
 if __name__ == '__main__':
     from evaluation.plots.maps import savefig_location_annotations_on_map
+
+    print(get_locations_south_korea())
 
     # _locations = list(LOCATION_VARIETY_JAPAN.keys())
     # _locations = list(LOCATION_VARIETY_SWITZERLAND.keys())
@@ -343,10 +353,11 @@ if __name__ == '__main__':
     # _colors = [_cmap[LOCATION_VARIETY[_loc]] for _loc in _locations]
 
     savefig_location_annotations_on_map(
-        annotations=[''] * len(_locations),
+        # annotations=[''] * len(_locations),
+        annotations=[l.split('/')[1] for l in _locations],
         # [_loc.split('/')[1] for _loc in _locations],
         locations=_locations,
-        path='variety_distribution',
+        path='variety_distribution_names',
         colors=_colors,
     )
 

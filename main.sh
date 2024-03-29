@@ -33,3 +33,7 @@
 ./scripts/train_df_mlp_era5.sh
 
 # FIGURES
+
+
+# PLOT UTAH CHILL FUNCTION AND DOUBLE LOGISTIC APPROXIMATION
+python3 -m runs.plot_logistic

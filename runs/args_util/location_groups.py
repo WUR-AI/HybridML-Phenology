@@ -2,6 +2,7 @@
 import data.bloom_doy
 import data.regions
 
+
 """
     Pre-configured named location groups on which the models can be run
     Defines a mapping from
@@ -42,6 +43,8 @@ LOCATION_GROUPS = {
 
     'japan_tokyo': ['Japan/Tokyo'],
     'japan_kyoto': ['Japan/Kyoto-1'],
+
+    'south_korea_wo_juji': data.regions.LOCATIONS_SOUTH_KOREA_WO_JUJI,
 
     # All selected locations to be included in comparing the process-based models with the learned chill model
     # Includes:

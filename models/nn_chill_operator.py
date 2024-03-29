@@ -4,7 +4,7 @@ import config
 from models.base_torch_accumulation import BaseTorchAccumulationModel
 from models.components.param_v3 import ParameterModel
 from models.components.torch_phenology import DegreeDaysCNN, DegreeDaysDNN_PP, DegreeDaysDNN, DegreeDaysDNN_Coord, \
-    DegreeDaysV
+    DegreeDaysV, DegreeDaysDNN_Alt, DegreeDaysDNN_Stat
 from models.components.torch_phenology_pb import TorchGDD, LogisticUtahChillModule
 # from models.components.param import ParameterModel
 
@@ -33,9 +33,11 @@ class NNChillModel(BaseTorchAccumulationModel):
         )
         # self._chill_model = DegreeDaysCNN()
         self._chill_model = DegreeDaysDNN(hidden_size=64)
+        # self._chill_model = DegreeDaysDNN_Stat(hidden_size=64)
         # self._chill_model = DegreeDaysV(hidden_size=64)
         # self._chill_model = DegreeDaysDNN_PP()
-        # self._chill_model = DegreeDaysDNN_Coord()
+        # self._chill_model = DegreeDaysDNN_Coord(hidden_size=64)
+        # self._chill_model = DegreeDaysDNN_Alt(hidden_size=64)
 
     def f_units(self, xs: dict, tb: torch.Tensor):
         cus = self._chill_model(xs)

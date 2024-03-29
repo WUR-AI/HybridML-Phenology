@@ -233,7 +233,8 @@ if __name__ == '__main__':
 
     model_cls = NNChillModel
     # model_cls = LocalUtahChillModel
-    model_name = None
+    # model_name = None
+    model_name = 'NNChillModel_japan_seed18'
 
     model_name = model_name or model_cls.__name__
 
@@ -245,12 +246,14 @@ if __name__ == '__main__':
 
     model = model_cls.load(model_name)
 
-    year = dataset._years_test[1]
+    # year = dataset._years_test[1]
+    year = 2000
 
     local_ixs_true = dict()
     local_ixs_pred = dict()
 
-    for x in dataset.get_test_data_in_years([year]):
+    # for x in dataset.get_test_data_in_years([year]):
+    for x in dataset.get_train_data_in_years([year]):
 
         ix_true = x['bloom_ix']
         ix_pred, _, _ = model.predict_ix(x)
