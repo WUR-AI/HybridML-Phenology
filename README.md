@@ -17,7 +17,7 @@ The code can be used to reproduce the results of the manuscript titled "A hybrid
 
 ## Data
 
-A cherry Tree Phenology data was compiled from various sources by George Mason’s Department of Statistics and can be found in [this](https://github.com/GMU-CherryBlossomCompetition/peak-bloom-prediction) Github repository. The repo should be cloned and data should be stored in `data/original`
+A cherry Tree Phenology data was compiled from various sources by George Mason’s Department of Statistics and can be found in [this](https://github.com/GMU-CherryBlossomCompetition/peak-bloom-prediction) GitHub repository. The repo should be cloned and data should be stored in `data/original`
 
 Publicly available MERRA-2 temperature data was used in this research. The code used for collecting the data can be found [here](https://github.com/ronvree/MERRA-2-Download). The resulting file should be stored in the `data/original` folder.
 
@@ -26,6 +26,8 @@ Publicly available MERRA-2 temperature data was used in this research. The code 
 The `runs` folder contains all configurable Python scripts used to run experiments.
 
 The `scripts` folder contains all configured scripts that generated the results presented in the manuscript. The `seeds.txt` file lists all seeds used to generate the results.
+
+Running `main.sh` reproduces all results presented in the manuscript. Note that fitting all models for all seeds can take a long time (in the order of weeks).
 
 ### Examples
 
