@@ -4,7 +4,7 @@
 This repository contains the code used for combining biophysical process-based model of cherry tree phenology with machine learning methods for improved phenology predictions.
 
 
-The code can be used to reproduce the results of the manuscript titled "A hybrid of deep learning and process based model components improves phenology  predictions".
+The code can be used to reproduce the results of the manuscript titled "Hybrid Phenology Modeling for Predicting Temperature Effects on Tree Dormancy".
 
 
 [//]: # (![Schematic overview of the model structure]&#40;figures/schematic_overview.png&#41;)
