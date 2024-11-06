@@ -9,7 +9,7 @@ from models.base_torch import BaseTorchModel
 from util.normalization import normalize_latitude, normalize_longitude
 
 
-class LSTMModel(BaseTorchModel):
+class LSTMModel_Deprecated(BaseTorchModel):
 
     def __init__(self):
         super().__init__()
@@ -39,7 +39,7 @@ class LSTMModel(BaseTorchModel):
         return ixs, {}
 
 
-class LSTMModel2(BaseTorchModel):
+class LSTMModel(BaseTorchModel):
 
     def __init__(self):
         super().__init__()
@@ -103,7 +103,7 @@ class LSTMModel2(BaseTorchModel):
         }
 
 
-class LSTMModel3(BaseTorchModel):
+class LSTMModelLocal(BaseTorchModel):
 
     def __init__(self):
         super().__init__()
