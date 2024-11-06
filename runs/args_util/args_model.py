@@ -10,6 +10,7 @@ from models.components.param_v3 import LocalParameterMapping, GlobalParameterMap
 from models.diff_utah import DiffUtahModel
 from models.lstm import LSTMModel, LSTMModel2, LSTMModel3
 from models.mean import MeanModel
+from models.nn_chill_double import NNChillForceModel
 from models.nn_chill_operator import NNChillModel
 from models.process_based.base_accumulation import BaseAccumulationModel, BaseLocalAccumulationModel
 from models.process_based.chill_days import ChillDaysModel, LocalChillDaysModel
@@ -62,6 +63,9 @@ MODELS = [
     # LSTMModel,
     LSTMModel2,
     LSTMModel3,
+
+    # Other
+    NNChillForceModel,
 
 ]
 
