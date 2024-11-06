@@ -109,6 +109,7 @@ class BaseTorchModel(BaseModel, nn.Module):
 
         model = (model or cls(**model_kwargs)).to(device).to(config.TORCH_DTYPE)
 
+        # print(sum([p.numel() for p in model.parameters()]))
         # TODO -- show model name in progress bar?
 
         model._fit_info = info = dict()
