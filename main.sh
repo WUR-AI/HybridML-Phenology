@@ -13,21 +13,25 @@
 # LEARN CHILL FUNCTION
 ./scripts/train_df_mlp.sh
 
-# LEARN CHILL FUNCTION WITH CULTIVAR PARAMETERS
-./scripts/train_df_mlp_cultivar.sh
+# LEARN CHILL FUNCTION WITH SPECIES PARAMETERS
+./scripts/train_df_mlp_species.sh
 
 # LEARN CHILL FUNCTION WITH CULTIVAR PARAMETERS AND HELD OUT LOCATIONS
-./scripts/train_df_mlp_cultivar_holdout.sh
+./scripts/train_df_mlp_species_holdout.sh
 
-# LEARN A CHILL FUNCTION FOR THE YEDOENSIS CULTIVAR
+# LEARN A CHILL FUNCTION FOR THE YEDOENSIS SPECIES
 ./scripts/train_df_mlp_yedoensis.sh
 # FREEZE CHILL FUNCTION WEIGHTS AND FIT REMAINING PARAMETERS TO DATA IN SOUTH KOREA
 ./scripts/fine_tune_yedoensis.sh
 
-# FIT PROCESS-BASED MODELS WITH CULTIVAR PARAMETERS
-./scripts/train_pb_hour_cultivar.sh
-./scripts/train_pb_utah_cultivar.sh
-./scripts/train_pb_days_cultivar.sh
+# FIT PROCESS-BASED MODELS WITH SPECIES PARAMETERS
+./scripts/train_pb_hour_species.sh
+./scripts/train_pb_utah_species.sh
+./scripts/train_pb_days_species.sh
+
+# FIT LSTM MODELS
+./scripts/train_lstm_baseline.sh
+./scripts/train_lstm_baseline_species.sh
 
 # ABLATION
 # - TRAIN DIFFERENTIABLE APPROXIMATION TO UTAH MODEL
