@@ -12,7 +12,7 @@ The code can be used to reproduce the results of the manuscript titled "Hybrid P
 <p align="center">
 <img src="figures/learned_chill_response.png" alt="Learned temperature response curves" width="640" height="350">
 </p>
-The image above shows plots of different temperature response curves learned in Japan under different random seeds controlling weight initialization and data split. $3\times 3$ plots are shown that were generated using seeds 1,2,3 respectively (from left to right) for weight initialization and 1,2,3 respectively (from top to bottom) for the data split.
+The image above shows plots of different temperature response curves learned in Japan under different random seeds controlling weight initialization and data split. 3x3 plots are shown that were generated using seeds 1,2,3 respectively (from left to right) for weight initialization and 1,2,3 respectively (from top to bottom) for the data split.
 
 
 ## Prerequisites
