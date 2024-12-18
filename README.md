@@ -1,8 +1,7 @@
 
 # Hybrid Machine Learning Model for Predicting Cherry Tree Phenology
 
-This repository contains the code used for combining biophysical process-based model of cherry tree phenology with machine learning methods for improved phenology predictions.
-
+This repository contains the code used for combining biophysical process-based model of cherry tree phenology with machine learning methods for inter-comparing their dynamics.
 
 The code can be used to reproduce the results of the manuscript titled "Hybrid Phenology Modeling for Predicting Temperature Effects on Tree Dormancy".
 
@@ -10,6 +9,10 @@ The code can be used to reproduce the results of the manuscript titled "Hybrid P
 [//]: # (![Schematic overview of the model structure]&#40;figures/schematic_overview.png&#41;)
 
 ![Probability of cherry trees having flowered in Japan throughout the year 2000 according to our model](figures/prob_map.gif) 
+
+<img src="figures/learned_chill_response.png" alt="Learned temperature response curves" width="640" height="350">
+
+The image above shows plots of different temperature response curves learned in Japan under different random seeds controlling weight initialization and data split. $3\times 3$ plots are shown that were generated using seeds 1,2,3 respectively (from left to right) for weight initialization and 1,2,3 respectively (from top to bottom) for the data split.
 
 
 ## Prerequisites
